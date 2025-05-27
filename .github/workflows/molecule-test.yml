@@ -1,0 +1,20 @@
+on:
+  push:
+
+jobs:
+  molecule-test:
+    runs-on: self-hosted
+    strategy:
+      max-parallel: 1 # this can be faster, working on it :)
+      matrix:
+        os-target: [ubuntu22, debian12, rocky95]
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v4
+      - name: Run molecule tests
+        env:
+          AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+          AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+        run: |
+          make test-${{ matrix.os-target }}
+

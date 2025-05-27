@@ -1,0 +1,6 @@
+git+https://github.com/ansible/molecule@main#egg=molecule
+#molecule==25.4.0
+ansible-core
+molecule-plugins[ec2]
+boto3
+ansible-doctor

@@ -1,0 +1,18 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: instance
+    image: "${AWS_AMI_ID}"
+    instance_type: "${AWS_INSTANCE_TYPE}"
+    ssh_user: molecule
+    vpc_subnet_id: "${AWS_VPC_SUBNET_ID}"
+    region: "${AWS_REGION}"
+    tags:
+      Name: molecule_instance
+provisioner:
+  name: ansible
+verifier:
+  name: ansible

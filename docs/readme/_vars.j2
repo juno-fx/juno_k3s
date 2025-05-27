@@ -1,0 +1,9 @@
+{% set var = role.var | default({}) %}
+{% if var %}
+
+## Role variables
+| Name | Default value | Description |
+|:-----|:--------------|:------------|
+{% for key, item in var | dictsort %}| {{ key }} | {{ item.default | default('') }} | {{ item.description | default('') }} |
+{% endfor %}
+{% endif %}
