@@ -1,0 +1,13 @@
+exclude_files:
+  - venv/
+  - molecule/
+
+template:
+  name: readme
+  src: local>docs/
+renderer:
+  force_overwrite: True
+
+role:
+  name: juno_k3s
+

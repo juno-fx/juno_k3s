@@ -1,0 +1,3 @@
+---
+#@var my_var:description: This is my description
+my_var: value
