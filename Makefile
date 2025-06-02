@@ -16,11 +16,11 @@ venv/bin/activate:
 docs: venv/bin/activate
 	venv/bin/ansible-doctor
 
-login: venv/bin/activate
-	. venv/bin/activate; venv/bin/molecule login
+login-%: venv/bin/activate
+	. venv/bin/activate; venv/bin/molecule login -s ec2 --host k8s_${*}
 
 converge-%: venv/bin/activate
-	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} venv/bin/molecule -vvv converge -s ec2
+	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} venv/bin/molecule converge -s ec2
 
 test-%: venv/bin/activate
 	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} venv/bin/molecule -vvv test -s ec2
@@ -39,3 +39,7 @@ test-rocky95: test-rocky95
 destroy-debian12: destroy-debian12
 destroy-ubuntu22: destroy-ubuntu22
 destroy-rocky95: destroy-rocky95
+login-control_plane01: login-control_plane01
+login-control_plane02: login-control_plane02
+login-control_plane03: login-control_plane03
+login-worker01: login-worker01

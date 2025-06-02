@@ -1,0 +1,14 @@
+---
+- name: Validate user input
+  ansible.builtin.include_tasks: pre_flight_user_input.yml
+
+- name: Check if we are on one of supported platforms
+  when: validate_os_version
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution in ['Ubuntu', 'Debian','RedHat']
+    fail_msg: "This Ansible role is only supported on Ubuntu, Debian, or RedHat distributions."
+
+- name: Include the platform-specific pre-flight checks
+  when: validate_os_version
+  ansible.builtin.include_tasks: "pre_flight_{{ ansible_distribution | lower }}.yml"

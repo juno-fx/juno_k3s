@@ -1,0 +1,5 @@
+- name: When acting on an existing cluster, assert the join token is defined
+  ansible.builtin.assert:
+    that:
+      - k3s_join_token is defined
+  when: not k3s_bootstrap_node

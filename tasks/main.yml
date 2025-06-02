@@ -1,4 +1,9 @@
 ---
-- name: Say hello
-  ansible.builtin.debug:
-    msg: "hello world!"
+- name: Include pre-flight validation tasks
+  ansible.builtin.include_tasks: pre_flight.yml
+
+- name: Include system setup tasks
+  ansible.builtin.include_tasks: system_setup.yml
+
+- name: Include k3s_install tasks
+  ansible.builtin.include_tasks: k3s_install.yml

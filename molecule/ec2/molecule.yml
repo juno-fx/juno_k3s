@@ -3,16 +3,102 @@ dependency:
   name: galaxy
 driver:
   name: ec2
+# security groups cannot be defined outside one of those items - so they must live in the list here.
+# Not the cleanest, but necessary.
 platforms:
-  - name: instance
+  - name: k8s_control_plane01
+    groups:
+      - control_plane
     image: "${AWS_AMI_ID}"
     instance_type: "${AWS_INSTANCE_TYPE}"
     ssh_user: molecule
     vpc_subnet_id: "${AWS_VPC_SUBNET_ID}"
     region: "${AWS_REGION}"
     tags:
-      Name: molecule_instance
+      Name: molecule_k8s_control_plane01
+      molecule: true
+    # This is a little dangerous - it will overwrite any groups existing cloudside with a matching name.
+    # That's why we give it an intentionally complex and verbose name, avoiding any clashes.
+    security_group_name: molecule-juno_k3s-tests
+    # all KVs get passed in to this in the end: https://docs.ansible.com/ansible/latest/collections/amazon/aws/ec2_security_group_module.html
+    security_group_rules:
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: "0.0.0.0/0"
+      - proto: icmp
+        from_port: 8
+        to_port: -1
+        cidr_ip: "0.0.0.0/0"
+      # https://docs.k3s.io/installation/requirements
+      - proto: tcp
+        rule_desc: The k8s API
+        from_port: 6443
+        to_port: 6443
+        group_name: molecule-juno_k3s-tests
+      - proto: tcp
+        rule_desc: HA etcd
+        from_port: 2379
+        to_port: 2380
+        group_name: molecule-juno_k3s-tests
+      - proto: tcp
+        rule_desc: kubelet metrics
+        from_port: 10250
+        to_port: 10250
+        group_name: molecule-juno_k3s-tests
+        # ToDo: switch to flannel wireguard. VXLAN is unencrypted.
+        # We just need to validate the kernel modules/etc. are present in pre-flight first, otherwise we might get errors across different distros.
+      - proto: udp
+        rule_desc: flannel_vxlan
+        from_port: 8472
+        to_port: 8472
+        group_name: molecule-juno_k3s-tests
+    security_group_rules_egress: # ToDo: emulate airgap here
+      - proto: -1
+        from_port: 0
+        to_port: 0
+        cidr_ip: "0.0.0.0/0"
+  - name: k8s_control_plane02
+    groups:
+      - control_plane
+    image: "${AWS_AMI_ID}"
+    instance_type: "${AWS_INSTANCE_TYPE}"
+    ssh_user: molecule
+    vpc_subnet_id: "${AWS_VPC_SUBNET_ID}"
+    region: "${AWS_REGION}"
+    tags:
+      Name: molecule_k8s_control_plane02
+      molecule: true
+    security_groups: [molecule-juno_k3s-tests]
+  - name: k8s_control_plane03
+    groups:
+      - control_plane
+    image: "${AWS_AMI_ID}"
+    instance_type: "${AWS_INSTANCE_TYPE}"
+    ssh_user: molecule
+    vpc_subnet_id: "${AWS_VPC_SUBNET_ID}"
+    region: "${AWS_REGION}"
+    tags:
+      Name: molecule_k8s_control_plane03
+      molecule: true
+    security_groups: [molecule-juno_k3s-tests]
+  - name: k8s_worker01
+    groups:
+      - k8s_worker
+    image: "${AWS_AMI_ID}"
+    instance_type: "${AWS_INSTANCE_TYPE}"
+    ssh_user: molecule
+    vpc_subnet_id: "${AWS_VPC_SUBNET_ID}"
+    region: "${AWS_REGION}"
+    tags:
+      Name: molecule_k8s_worker01
+      molecule: true
+    security_groups: [molecule-juno_k3s-tests]
 provisioner:
   name: ansible
+  inventory:
+    group_vars:
+      control_plane:
+        k3s_control_plane_node: true
 verifier:
   name: ansible

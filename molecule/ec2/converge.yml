@@ -1,7 +1,65 @@
 ---
-- name: Converge
+- name: Ensure the correct state of all nodes in the cluster
   hosts: all
+  vars:
   tasks:
-    - name: "Include juno_k3s"
+    - name: Check if the join token file exists
+      ansible.builtin.stat:
+        path: /var/lib/rancher/k3s/server/token
+      become: true
+      register: stat_k3s_bootstrap_node_token_file
+    
+    - any_errors_fatal: true
+      block:
+        - name: If the join token doesn't exist at all, bootstrap the cluster on the 1st node in the inventory
+          vars:
+            k3s_bootstrap_node: true
+          ansible.builtin.include_role:
+            name: "juno-fx.juno_k3s"
+          when:
+            - inventory_hostname == ansible_play_hosts[0]
+            - not stat_k3s_bootstrap_node_token_file.stat.exists
+
+
+    - name: Check if the join token file exists (again)
+      ansible.builtin.stat:
+        path: /var/lib/rancher/k3s/server/token
+      become: true
+      register: stat_k3s_bootstrap_node_token_file
+
+    - name: If the join token file exists across any of the control plane nodes, set the variable
+      become: true
+      ansible.builtin.slurp:
+        src: /var/lib/rancher/k3s/server/token
+      when: stat_k3s_bootstrap_node_token_file.stat.exists
+      register: slurp_k3s_bootstrap_node_token_file
+      run_once: true
+
+    - name: Make the variable available to the play
+      ansible.builtin.set_fact:
+        k3s_bootstrap_node_token: "{{ slurp_k3s_bootstrap_node_token_file.content | b64decode }}"
+        k3s_bootstrap_node_ip: "{{ ansible_default_ipv4.address }}"
+      when: stat_k3s_bootstrap_node_token_file.stat.exists
+      loop: "{{ ansible_play_hosts }}"
+      run_once: true
+      delegate_to: "{{ item }}"
+    - name: Gather service facts on the control plane nodes
+      ansible.builtin.service_facts:
+      when: k3s_control_plane_node | default(false) | bool
+
+    - name: Ensure k3s control plane nodes
+      vars:
+        k3s_join_token: "{{ k3s_bootstrap_node_token }}"
+      when:
+        - k3s_control_plane_node | default(false) | bool
+        - inventory_hostname != ansible_play_hosts[0] # ToDo: remove once idem is implemented
+      ansible.builtin.include_role:
+        name: "juno-fx.juno_k3s"
+
+    - name: Ensure k3s worker nodes
+      vars:
+        k3s_join_token: "{{ k3s_bootstrap_node_token }}"
+      when:
+        - not k3s_control_plane_node | default(false) | bool
       ansible.builtin.include_role:
         name: "juno-fx.juno_k3s"
