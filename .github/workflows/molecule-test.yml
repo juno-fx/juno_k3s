@@ -3,7 +3,8 @@ on:
 
 jobs:
   molecule-test:
-    runs-on: self-hosted
+    runs-on:
+      - X64
     strategy:
       max-parallel: 1 # this can be faster, working on it :)
       matrix:
