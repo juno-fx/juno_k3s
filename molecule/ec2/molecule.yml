@@ -3,6 +3,11 @@ dependency:
   name: galaxy
 driver:
   name: ec2
+  ssh_connection_options:
+    - -o ControlMaster=no
+    - -o ControlPersist=60s
+    - -o StrictHostKeyChecking=no
+    - -o UserKnownHostsFile=/dev/null
 # security groups cannot be defined outside one of those items - so they must live in the list here.
 # Not the cleanest, but necessary.
 platforms:
@@ -96,6 +101,9 @@ platforms:
     security_groups: [molecule-juno_k3s-tests]
 provisioner:
   name: ansible
+    #connection_options:
+    #  ssh_connection:
+    #    ssh_args: -o ControlMaster=no -o StrictHostKeyChecking=no
   inventory:
     group_vars:
       control_plane:
