@@ -1,0 +1,14 @@
+---
+- name: Assert firewalld is not running
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.services['firewalld']['state'] != 'running'
+    fail_msg: "Firewalld must not be running on RedHat-based systems (it can be stopped or masked). See: https://docs.rke2.io/known_issues#firewalld-conflicts-with-default-networking"
+  when: "'firewalld' in ansible_facts.services"
+
+- name: Assert SELinux is permissive or disabled
+  when: "'selinux' in ansible_facts.services"
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.selinux.status in ['permissive', 'disabled']
+    fail_msg: "SELinux must be permissive or disabled on RedHat-based systems. If this is an important feature for you, please raise a feature request for it."

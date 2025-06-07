@@ -4,3 +4,4 @@ ansible-core
 molecule-plugins[ec2]
 boto3
 ansible-doctor
+ansible-lint

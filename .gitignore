@@ -1,2 +1,4 @@
 venv/
 .devbox
+.vscode
+.ansible

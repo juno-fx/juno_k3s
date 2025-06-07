@@ -1,3 +1,40 @@
 ---
-#@var my_var:description: This is my description
-my_var: value
+# @var validate_os_version:description: Check we are on a supported OS version, error otherwise.
+validate_os_version: true
+
+# ToDo: wrap up and test airgap install
+# @var k3s_binary_url:description: URL for the k3s binary. Can be https:// OR file://
+k3s_install_script_url: https://get.k3s.io/
+k3s_binary_url: https://github.com/k3s-io/k3s/releases/download/v1.33.1%2Bk3s1/k3s
+k3s_images_url: https://github.com/k3s-io/k3s/releases/download/v1.33.1%2Bk3s1/k3s-airgap-images-amd64.tar.gz
+
+# @var k3s_join_token:description: >
+#   The token used to join the cluster. You can specify it explicitly or let the playbook autodiscover it.
+#   Check out the example playbook for how to do that.
+# k3s_join_token: false
+
+k3s_airgap_install: false
+
+# @var k3s_bootstrap_node:description: >
+#   The node used to bootstrap the cluster. This should only ever be a single node in your inventory!
+#   The playbook example we provide discovers this dynamically, but you can also set it manually.
+k3s_bootstrap_node: false
+
+# @var k3s_control_plane_node:description: >
+#   When true, join the node to an existing cluster as a control plane node.
+#   When neither k3s_bootstrap_node nor k3s_control_plane_node is true, the node will be a worker node.
+k3s_control_plane_node: false
+
+# @var k3s_clusterjoin_address:description: The address of the cluster to join. Can only be false when k3s_bootstrap_node is true.
+k3s_clusterjoin_address: false
+
+# @var k3s_bootstrap_node_ip:description: >
+#   The IP address of an existing controlplane node, used to join the cluster.
+#   In most cases, we can automatically discover this, check out the playbook example - it does that out of the box!
+k3s_bootstrap_node_ip: false
+
+k3s_bootstrap_node_token: false
+
+# @var k3s_force_reinstall:description: >
+#   If true, rerun the k3s install script even if the node is already part of a cluster.
+k3s_force_reinstall: false
