@@ -1,4 +1,8 @@
 ---
+- name: Gather service facts
+  become: true
+  ansible.builtin.service_facts:
+
 - name: Validate user input
   ansible.builtin.include_tasks: pre_flight_user_input.yml
 
@@ -6,7 +10,8 @@
   when: validate_os_version
   ansible.builtin.assert:
     that:
-      - ansible_distribution in ['Ubuntu', 'Debian','RedHat']
+      # todo: evaluate alma9, do a quick sanity check. Should be identical to Rocky and require no further changes
+      - ansible_distribution in ['Ubuntu', 'Debian','RedHat', "Rocky"]
     fail_msg: "This Ansible role is only supported on Ubuntu, Debian, or RedHat distributions."
 
 - name: Include the platform-specific pre-flight checks
