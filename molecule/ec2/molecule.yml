@@ -5,7 +5,7 @@ driver:
   name: ec2
   ssh_connection_options:
     - -o ControlMaster=no
-    - -o ControlPersist=60s
+    - -o ControlPersist=0
     - -o StrictHostKeyChecking=no
     - -o UserKnownHostsFile=/dev/null
 # security groups cannot be defined outside one of those items - so they must live in the list here.
