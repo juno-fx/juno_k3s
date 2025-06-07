@@ -3,11 +3,11 @@ dependency:
   name: galaxy
 driver:
   name: ec2
-  ssh_connection_options:
-    - -o ControlMaster=no
-    - -o ControlPersist=0
-    - -o StrictHostKeyChecking=no
-    - -o UserKnownHostsFile=/dev/null
+    #  ssh_connection_options:
+    #    - -o ControlMaster=no
+    #    - -o ControlPersist=0
+    #    - -o StrictHostKeyChecking=no
+    #    - -o UserKnownHostsFile=/dev/null
 # security groups cannot be defined outside one of those items - so they must live in the list here.
 # Not the cleanest, but necessary.
 platforms:
