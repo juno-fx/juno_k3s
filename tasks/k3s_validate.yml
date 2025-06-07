@@ -1,0 +1,4 @@
+# validate etcd health
+# validate apiserver
+# validate kubelet
+# validate partitioning - containers? emptydir/kubelet ?

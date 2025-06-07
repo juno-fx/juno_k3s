@@ -6,8 +6,7 @@ template:
   name: readme
   src: local>docs/
 renderer:
-  force_overwrite: True
+  force_overwrite: true
 
 role:
   name: juno_k3s
-

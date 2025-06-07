@@ -1,0 +1,56 @@
+---
+- name: Ensure /opt/k3s
+  ansible.builtin.file:
+    path: /opt/k3s
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+  become: true
+
+- name: Download the install script
+  ansible.builtin.get_url:
+    url: "{{ k3s_install_script_url }}"
+    dest: /opt/k3s/install.sh
+    mode: "0755"
+    owner: root
+    group: root
+  become: true
+
+- name: Download the k3s binary
+  ansible.builtin.get_url:
+    url: "{{ k3s_binary_url }}"
+    dest: /usr/local/bin/k3s
+    mode: "0755"
+    owner: root
+    group: root
+  become: true
+
+- name: Gather service facts
+  become: true
+  ansible.builtin.service_facts:
+
+- name: Check if k3s service exists and is running (control plane)
+  ansible.builtin.set_fact:
+    k3s_status: "{{ ansible_facts.services['k3s.service']['state'] | default('absent') }}"
+
+- name: Check if k3s-agent service exists and is running (worker node)
+  ansible.builtin.set_fact:
+    k3s_status: "{{ ansible_facts.services['k3s-agent.service']['state'] | default('absent') }}"
+  when: "k3s_status != 'running' and 'k3s-agent.service' in ansible_facts.services"
+
+# ToDo: let users define their own, immutable join token
+- name: If we're not in a cluster, perform the node registration tasks
+  become: true
+  when: k3s_status != 'running'
+  vars:
+    cluster_bootstrap_flags: "{{ '--cluster-init' if k3s_bootstrap_node else '' }}"
+    node_role: "{{ 'server' if k3s_control_plane_node or k3s_bootstrap_node else 'agent' }}"
+    join_flags: "{{ '--server https://' + k3s_bootstrap_node_ip + ':6443 --token ' + k3s_join_token if not k3s_bootstrap_node else '' }}"
+  ansible.builtin.command:
+    cmd: >
+      /opt/k3s/install.sh {{ node_role }}
+      {{ join_flags }}
+      {{ cluster_bootstrap_flags }}
+  environment:
+    INSTALL_K3S_SKIP_DOWNLOAD: "true"

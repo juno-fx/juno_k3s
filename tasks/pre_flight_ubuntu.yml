@@ -1,0 +1,14 @@
+---
+- name: Debug the current distribution
+  ansible.builtin.debug:
+    msg: "Current distribution is {{ ansible_distribution }} with version {{ ansible_distribution_major_version }}"
+
+# ToDo: the AMI AWS provides reports this wrong!
+#- name: Assert we are on support major version of Ubuntu
+#  ansible.builtin.assert:
+#    that:
+#      - ansible_distribution_major_version in ['22']
+#    fail_msg: "This Ansible role is only supported on  22.x."
+#  vars:
+#    supported_major_versions:
+#      - "22"

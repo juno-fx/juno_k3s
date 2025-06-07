@@ -23,6 +23,14 @@
 {#      Meta      #}
 {% include '_meta.j2' %}
 
+
+# Example playbook
+
+```yaml
+{# ansible-doctor will not read a relative path correctly here - a symlink works #}
+{% include 'molecule_converge_symlink.yml' %}
+
+```
 # Development workflow
 
 This repository comes in with a Makefile providing targets for testing & linting the role.
