@@ -57,7 +57,15 @@ platforms:
       - proto: -1
         from_port: 0
         to_port: 0
-        cidr_ip: "0.0.0.0/0"
+        cidr_ip: "10.0.0.0/8"
+      - proto: -1
+        from_port: 0
+        to_port: 0
+        cidr_ip: "172.16.0.0/12"
+      - proto: -1
+        from_port: 0
+        to_port: 0
+        cidr_ip: "192.168.0.0/16"
   - name: k8s_control_plane02
     groups:
       - control_plane

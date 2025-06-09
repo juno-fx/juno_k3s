@@ -8,7 +8,19 @@
     mode: "0750"
   become: true
 
-- name: Download the install script
+- name: When performing an airgap install, ensure the image dir exists
+  become: true
+  when: k3s_airgap_install | bool
+  ansible.builtin.file:
+    path: /var/lib/rancher/k3s/agent/images/
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+
+# ToDo: validate all possible user input combinations here
+- name: Download the install script (http/s fetch)
+  when: "'http://' in k3s_install_script_url or 'https://' in k3s_install_script_url"
   ansible.builtin.get_url:
     url: "{{ k3s_install_script_url }}"
     dest: /opt/k3s/install.sh
@@ -17,7 +29,8 @@
     group: root
   become: true
 
-- name: Download the k3s binary
+- name: Download the k3s binary (https/s fetch)
+  when: "'http://' in k3s_binary_url or 'https://' in k3s_binary_url"
   ansible.builtin.get_url:
     url: "{{ k3s_binary_url }}"
     dest: /usr/local/bin/k3s
@@ -26,9 +39,68 @@
     group: root
   become: true
 
-- name: Gather service facts
+- name: Download the k3s images (https/s fetch)
+  when:
+    - "'http://' in k3s_images_url or 'https://' in k3s_images_url"
+    - k3s_airgap_install
+  ansible.builtin.get_url:
+    url: "{{ k3s_images_url }}"
+    dest: "/var/lib/rancher/k3s/agent/images/{{ k3s_images_url | basename }}"
+    mode: "0644"
+    owner: root
+    group: root
   become: true
-  ansible.builtin.service_facts:
+
+- name: Copy over the install script (file:// k3s_install_script_url)
+  when:
+    - "'file://' in k3s_install_script_url"
+    - k3s_airgap_install
+  ansible.builtin.copy:
+    src: "{{ k3s_install_script_url | regex_replace('^file://', '') }}"
+    dest: /opt/k3s/install.sh
+    mode: "0755"
+    owner: root
+    group: root
+  become: true
+
+- name: Copy over the k3s binary (file:// k3s_binary_url)
+  when: "'file://' in k3s_binary_url"
+  ansible.builtin.copy:
+    src: "{{ k3s_binary_url | regex_replace('^file://', '') }}"
+    dest: /usr/local/bin/k3s
+    mode: "0755"
+    owner: root
+    group: root
+  become: true
+
+- name: Copy over the k3s images (file:// k3s_images_url)
+  when: "'file://' in k3s_images_url"
+  ansible.builtin.copy:
+    src: "{{ k3s_images_url | regex_replace('^file://', '') }}"
+    dest: "/var/lib/rancher/k3s/agent/images/{{ k3s_images_url | basename }}"
+    mode: "0644"
+    owner: root
+    group: root
+  become: true
+
+- name: Ensure /etc/rancher/k3s
+  ansible.builtin.file:
+    path: /etc/rancher/k3s
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+  become: true
+
+- name: Template in registries.yaml
+  when: "k3s_registries_yaml | default(False) | bool"
+  ansible.builtin.template:
+    content: "{{ k3s_registries_yaml }}"
+    dest: /etc/rancher/k3s/registries.yaml
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
 
 - name: Check if k3s service exists and is running (control plane)
   ansible.builtin.set_fact:
@@ -42,7 +114,7 @@
 # ToDo: let users define their own, immutable join token
 - name: If we're not in a cluster, perform the node registration tasks
   become: true
-  when: k3s_status != 'running'
+  when: k3s_status != 'running' or k3s_force_reinstall
   vars:
     cluster_bootstrap_flags: "{{ '--cluster-init' if k3s_bootstrap_node else '' }}"
     node_role: "{{ 'server' if k3s_control_plane_node or k3s_bootstrap_node else 'agent' }}"

@@ -2,13 +2,17 @@
 - name: Ensure the correct state of all nodes in the cluster
   hosts: all
   vars:
+    k3s_install_script_url: "file://{{ playbook_dir }}/airgap_files/install.sh"
+    k3s_binary_url: "file://{{ playbook_dir }}/airgap_files/k3s"
+    k3s_images_url: "file://{{ playbook_dir }}/airgap_files/k3s-airgap-images-amd64.tar.zst"
+    k3s_airgap_install: true
   tasks:
     - name: Check if the join token file exists
       ansible.builtin.stat:
         path: /var/lib/rancher/k3s/server/token
       become: true
       register: stat_k3s_bootstrap_node_token_file
-    
+
     - any_errors_fatal: true
       block:
         - name: If the join token doesn't exist at all, bootstrap the cluster on the 1st control plane node in the inventory
@@ -17,18 +21,9 @@
           ansible.builtin.include_role:
             name: "juno-fx.juno_k3s"
           when:
-            - inventory_hostname == (
-                ansible_play_hosts_all
-                | map('extract', hostvars)
-                | selectattr('k3s_control_plane_node', 'defined')
-                | selectattr('k3s_control_plane_node', 'equalto', true)
-                | map(attribute='inventory_hostname')
-                | list
-                | first
-              )
+            - inventory_hostname == (ansible_play_hosts | selectattr('k3s_control_plane_node', 'defined') | selectattr('k3s_control_plane_node', 'equalto', true) | first).inventory_hostname
             - not stat_k3s_bootstrap_node_token_file.stat.exists
             - k3s_control_plane_node | default(false) | bool
-
 
     - name: Check if the join token file exists (again)
       ansible.builtin.stat:

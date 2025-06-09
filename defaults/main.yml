@@ -2,10 +2,20 @@
 # @var validate_os_version:description: Check we are on a supported OS version, error otherwise.
 validate_os_version: true
 
-# ToDo: wrap up and test airgap install
-# @var k3s_binary_url:description: URL for the k3s binary. Can be https:// OR file://
-k3s_install_script_url: https://get.k3s.io/
+# @var k3s_binary_url:description: >
+#   URL for the k3s binary. Can be http://, https:// OR file://
+#   When using file://, a path from your ansible control host (where your run the playbook from) will be used.
+#   The files will be copied to the remote kubernetes hosts. This is useful for airgap installs.
 k3s_binary_url: https://github.com/k3s-io/k3s/releases/download/v1.33.1%2Bk3s1/k3s
+# @var k3s_install_script_url:description: >
+#   URL for the k3s install script. Can be http://, https:// OR file://
+#   When using file://, a path from your ansible control host (where your run the playbook from) will be used.
+#   The files will be copied to the remote kubernetes hosts. This is useful for airgap installs.
+k3s_install_script_url: https://get.k3s.io/
+# @var k3s_images_url:description: >
+#   URL for the k3s images tarball. Can be http://, https:// OR file://
+#   When using file://, a path from your ansible control host (where your run the playbook from) will be used.
+#   The files will be copied to the remote kubernetes hosts. This is useful for airgap installs.
 k3s_images_url: https://github.com/k3s-io/k3s/releases/download/v1.33.1%2Bk3s1/k3s-airgap-images-amd64.tar.gz
 
 # @var k3s_join_token:description: >
@@ -38,3 +48,9 @@ k3s_bootstrap_node_token: false
 # @var k3s_force_reinstall:description: >
 #   If true, rerun the k3s install script even if the node is already part of a cluster.
 k3s_force_reinstall: false
+
+# @var k3s_registries:description: >
+#   If true, the playbook will configure the registries.yaml file to use your internal mirror.
+#   For syntax refer to https://docs.k3s.io/installation/private-registry
+#   The data you pass in here will be DIRECTLY templated into the registries.yaml file.
+k3s_registries_yaml: false

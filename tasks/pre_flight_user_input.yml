@@ -3,3 +3,28 @@
     that:
       - k3s_join_token is defined
   when: not k3s_bootstrap_node
+
+- name: Validate the install script URL
+  ansible.builtin.assert:
+    that:
+      - k3s_install_script_url is not none
+      - k3s_install_script_url | length > 0
+      - "'http://' in k3s_install_script_url or 'https://' in k3s_install_script_url or 'file://' in k3s_install_script_url"
+    fail_msg: "k3s_install_script_url must be a valid URL or file path, preceded by http://, https:// or file://"
+
+- name: Validate the k3s binary URL
+  ansible.builtin.assert:
+    that:
+      - k3s_binary_url is not none
+      - k3s_binary_url | length > 0
+      - "'http://' in k3s_binary_url or 'https://' in k3s_binary_url or 'file://' in k3s_binary_url"
+    fail_msg: "k3s_binary_url must be a valid URL or file path, preceded by http://, https:// or file://"
+
+- name: Validate the images URL
+  when: k3s_airgap_install | bool
+  ansible.builtin.assert:
+    that:
+      - k3s_images_url is not none
+      - k3s_images_url | length > 0
+      - "'http://' in k3s_images_url or 'https://' in k3s_images_url or 'file://' in k3s_images_url"
+    fail_msg: "k3s_images_url must be a valid URL or file path, preceded by http://, https:// or file://"

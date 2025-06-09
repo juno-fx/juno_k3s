@@ -1,0 +1,43 @@
+---
+# This contains all the prereqs we expect the user to perform before an airgap install
+- name: Gather airgap install files the user would place on the host on their own
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Ensure airgap_files exists in the molecule playbook dir
+      ansible.builtin.file:
+        name: "{{ playbook_dir }}/airgap_files"
+        state: directory
+    - name: Download the k3s install script to the airgap_files directory
+      ansible.builtin.get_url:
+        url: "https://get.k3s.io"
+        dest: "{{ playbook_dir }}/airgap_files/install.sh"
+        mode: "0644"
+    - name: Download the k3s binary to the airgap_files directory
+      ansible.builtin.get_url:
+        url: "https://github.com/k3s-io/k3s/releases/download/v1.33.1%2Bk3s1/k3s"
+        dest: "{{ playbook_dir }}/airgap_files/k3s"
+        mode: "0644"
+    - name: Download the k3s images to the airgap_files directory
+      ansible.builtin.get_url:
+        url: "https://github.com/k3s-io/k3s/releases/download/v1.33.1%2Bk3s1/k3s-airgap-images-amd64.tar.zst"
+        dest: "{{ playbook_dir }}/airgap_files/k3s-airgap-images-amd64.tar.zst"
+        mode: "0644"
+
+- name: Prepare k8s hosts
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Make sure python3 is installed
+      ansible.builtin.package:
+        name: python3
+        state: present
+      become: true
+    - name: Gather service facts
+      become: true
+      ansible.builtin.service_facts:
+    - name: If selinux is installed, make it permissive
+      ansible.builtin.command:
+        cmd: setenforce 0
+      when: "'selinux' in ansible_facts.services"
+      become: true
