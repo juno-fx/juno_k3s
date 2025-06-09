@@ -15,6 +15,25 @@
 {% include '_vars.j2' %}
 
 {#      Todo      #}
+
+
+# Example playbook - online/internet-enabled installation
+
+```yaml
+{# ansible-doctor will not read a relative path correctly here - a symlink works #}
+{% include 'molecule_converge_online_escaped.yml' %}
+```
+# Example playbook - airgapped installation
+
+The below playbook assumes you have downloaded all the necessary files listed in `vars:` and passed in the paths to them.
+You can check the detailed information for each file in the vars section above.
+
+
+```yaml
+{# ansible-doctor will not read a relative path correctly here - a symlink works #}
+{% include 'molecule_converge_airgapped_escaped.yml' %}
+
+```
 {% include '_tag.j2' %}
 
 {#      Todo      #}
@@ -24,13 +43,6 @@
 {% include '_meta.j2' %}
 
 
-# Example playbook
-
-```yaml
-{# ansible-doctor will not read a relative path correctly here - a symlink works #}
-{% include 'molecule_converge_symlink.yml' %}
-
-```
 # Development workflow
 
 This repository comes in with a Makefile providing targets for testing & linting the role.
