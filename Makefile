@@ -14,7 +14,15 @@ venv/bin/activate:
 	. venv/bin/activate; ansible-galaxy install -r test_requirements.yml
 
 docs: venv/bin/activate
-	venv/bin/ansible-doctor
+	# the filters available to us in ansible-doctor doesn't cut it for escaping Jinja in the molecule spec.
+	cp molecule/ec2/converge.yml docs/readme/molecule_converge_online_escaped.yml
+	cp molecule/ec2-airgap/converge.yml docs/readme/molecule_converge_airgapped_escaped.yml
+	# escape all jinja by injecting raw blocks at beginning and end of each file
+	sed -i '1s/^/{% raw %}\n/' docs/readme/molecule_converge_online_escaped.yml
+	sed -i '$$a{% endraw %}' docs/readme/molecule_converge_online_escaped.yml
+	sed -i '1s/^/{% raw %}\n/' docs/readme/molecule_converge_airgapped_escaped.yml
+	sed -i '$$a{% endraw %}' docs/readme/molecule_converge_airgapped_escaped.yml
+	ansible-doctor
 
 login-%: venv/bin/activate
 	. venv/bin/activate; venv/bin/molecule login -s ec2 --host k8s_${*}

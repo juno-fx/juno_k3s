@@ -23,6 +23,9 @@ k3s_images_url: https://github.com/k3s-io/k3s/releases/download/v1.33.1%2Bk3s1/k
 #   Check out the example playbook for how to do that.
 # k3s_join_token: false
 
+# @var k3s_airgap_install:description: >
+#   If true, the playbook will perform an airgapped install. Make sure all the URLs above are set to file:// or point to a local mirror.
+#   When setting the URLs to file://, they will be copied from your Ansible control host to the remote hosts.
 k3s_airgap_install: false
 
 # @var k3s_bootstrap_node:description: >
@@ -49,7 +52,7 @@ k3s_bootstrap_node_token: false
 #   If true, rerun the k3s install script even if the node is already part of a cluster.
 k3s_force_reinstall: false
 
-# @var k3s_registries:description: >
+# @var k3s_registries_yaml:description: >
 #   If true, the playbook will configure the registries.yaml file to use your internal mirror.
 #   For syntax refer to https://docs.k3s.io/installation/private-registry
 #   The data you pass in here will be DIRECTLY templated into the registries.yaml file.

@@ -4,3 +4,6 @@ venv/
 .ansible
 
 molecule/*/airgap_files/**
+
+docs/readme/molecule_converge_airgapped_escaped.yml
+docs/readme/molecule_converge_online_escaped.yml
