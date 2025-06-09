@@ -54,3 +54,16 @@ Note that if one of your steps defined in `tasks/` failed, the instances will be
 That's why `make test-*` is preferrable for CI, while `converge` is better for local dev.
 You still might want to run it locally when checking for idempotency - `make test` runs the playbook twice and expects no changes flagged on the 2nd run.
 
+
+## Release workflow
+
+This section aims to guide maintainers through the release workflow.
+
+
+When making a release tag, we first run the airgap tests.
+Those are expensive in terms of time - about 30 minutes per platform!
+
+Execution in customer environments is much faster - a bulk of that time is taken performing k3s image uploads
+from the runners to AWS.
+
+We manually trigger the airgap tests for now, by going to GH actions tab and running the workflow.

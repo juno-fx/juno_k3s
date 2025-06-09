@@ -19,17 +19,32 @@ docs: venv/bin/activate
 login-%: venv/bin/activate
 	. venv/bin/activate; venv/bin/molecule login -s ec2 --host k8s_${*}
 
+converge-airgap-%: venv/bin/activate
+	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} venv/bin/molecule converge -s ec2-airgap
+
+test-airgap-%: venv/bin/activate
+	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} venv/bin/molecule test -s ec2-airgap
+
+destroy-airgap-%: venv/bin/activate
+	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} venv/bin/molecule destroy -s ec2-airgap
+
 converge-%: venv/bin/activate
 	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} venv/bin/molecule converge -s ec2
 
 test-%: venv/bin/activate
-	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} venv/bin/molecule -vvv test -s ec2
+	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} venv/bin/molecule test -s ec2
 
 destroy-%: venv/bin/activate
-	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} venv/bin/molecule -vvv destroy -s ec2
+	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} venv/bin/molecule destroy -s ec2
 
 
 #tab autocomplete
+converge-airgap-debian12: converge-airgap-debian12
+converge-airgap-ubuntu22: converge-airgap-ubuntu22
+converge-airgap-rocky95: converge-airgap-rocky95
+test-airgap-debian12: test-airgap-debian12
+test-airgap-ubuntu22: test-airgap-ubuntu22
+test-airgap-rocky95: test-airgap-rocky95
 converge-debian12: converge-debian12
 converge-ubuntu22: converge-ubuntu22
 converge-rocky95: converge-rocky95

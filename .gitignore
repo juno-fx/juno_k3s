@@ -2,3 +2,5 @@ venv/
 .devbox
 .vscode
 .ansible
+
+molecule/*/airgap_files/**

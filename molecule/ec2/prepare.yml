@@ -1,5 +1,5 @@
 ---
-- name: Prepare
+- name: Prepare k8s hosts
   hosts: all
   gather_facts: false
   tasks:
@@ -8,9 +8,11 @@
         name: python3
         state: present
       become: true
+    - name: Gather service facts
+      become: true
+      ansible.builtin.service_facts:
     - name: If selinux is installed, make it permissive
       ansible.builtin.command:
         cmd: setenforce 0
       when: "'selinux' in ansible_facts.services"
-      ignore_errors: true
       become: true
