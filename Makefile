@@ -1,7 +1,8 @@
 .PHONY: docs
 
 debian12_AMI = ami-02da2f5b47450f5a8
-ubuntu22_AMI = ami-04f167a56786e4b09
+ubuntu22_AMI = ami-0b05d988257befbbe
+ubuntu24_AMI = ami-0d1b5a8c13042c939
 rocky95_AMI = ami-05150ea4d8a533099
 
 export AWS_VPC_SUBNET_ID ?= subnet-090d8a0ac7e70b207
@@ -49,21 +50,27 @@ destroy-%: venv/bin/activate
 #tab autocomplete
 converge-airgap-debian12: converge-airgap-debian12
 converge-airgap-ubuntu22: converge-airgap-ubuntu22
+converge-airgap-ubuntu24: converge-airgap-ubuntu24
 converge-airgap-rocky95: converge-airgap-rocky95
 test-airgap-debian12: test-airgap-debian12
 test-airgap-ubuntu22: test-airgap-ubuntu22
+test-airgap-ubuntu24: test-airgap-ubuntu24
 test-airgap-rocky95: test-airgap-rocky95
 destroy-airgap-debian12: destroy-airgap-debian12
 destroy-airgap-ubuntu22: destroy-airgap-ubuntu22
+destroy-airgap-ubuntu24: destroy-airgap-ubuntu24
 destroy-airgap-rocky95: destroy-airgap-rocky95
 converge-debian12: converge-debian12
 converge-ubuntu22: converge-ubuntu22
+converge-ubuntu24: converge-ubuntu24
 converge-rocky95: converge-rocky95
 test-debian12: test-debian12
 test-ubuntu22: test-ubuntu22
+test-ubuntu24: test-ubuntu24
 test-rocky95: test-rocky95
 destroy-debian12: destroy-debian12
 destroy-ubuntu22: destroy-ubuntu22
+destroy-ubuntu24: destroy-ubuntu24
 destroy-rocky95: destroy-rocky95
 login-control_plane01: login-control_plane01
 login-control_plane02: login-control_plane02
