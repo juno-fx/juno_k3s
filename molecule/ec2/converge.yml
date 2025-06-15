@@ -8,6 +8,18 @@
         path: /var/lib/rancher/k3s/server/token
       become: true
       register: stat_k3s_bootstrap_node_token_file
+    - name: If the token exists on any node, set the skip_bootstrap variable
+      ansible.builtin.set_fact:
+        k3s_skip_bootstrap: false
+      when: stat_k3s_bootstrap_node_token_file.stat.exists
+      run_once: true
+
+    - name: Make k3s_skip_bootstrap available to all hosts
+      ansible.builtin.set_fact:
+        k3s_skip_bootstrap: "{{ k3s_skip_bootstrap | default(false) }}"
+      loop: "{{ ansible_play_hosts }}"
+      delegate_to: "{{ item }}"
+      run_once: true
     
     - any_errors_fatal: true
       block:
@@ -28,6 +40,7 @@
               )
             - not stat_k3s_bootstrap_node_token_file.stat.exists
             - k3s_control_plane_node | default(false) | bool
+            - not k3s_skip_bootstrap | default(false)
 
 
     - name: Check if the join token file exists (again)

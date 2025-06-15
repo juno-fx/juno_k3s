@@ -14,6 +14,20 @@
       - ansible_distribution in ['Ubuntu', 'Debian','RedHat', "Rocky"]
     fail_msg: "This Ansible role is only supported on Ubuntu, Debian, or RedHat distributions."
 
+- name: Attempt to load the wireguard kernel module
+  become: true
+  ansible.builtin.command:
+    cmd: "modprobe wireguard"
+  register: wireguard_module
+  failed_when: false
+  changed_when: false
+
+- name: If that failed, raise an error
+  when: wireguard_module.rc != 0
+  ansible.builtin.fail:
+    msg: |
+      The wireguard kernel module is not available on this system. Please ensure it is present (see: https://www.wireguard.com/install/).
+      This should be present by default on Linux 5.6 and later, but may not be available on older kernels.
 - name: Include the platform-specific pre-flight checks
   when: validate_os_version
   ansible.builtin.include_tasks: "pre_flight_{{ ansible_distribution | lower }}.yml"

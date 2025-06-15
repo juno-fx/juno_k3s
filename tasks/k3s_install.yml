@@ -18,7 +18,6 @@
     group: root
     mode: "0750"
 
-# ToDo: validate all possible user input combinations here
 - name: Download the install script (http/s fetch)
   when: "'http://' in k3s_install_script_url or 'https://' in k3s_install_script_url"
   ansible.builtin.get_url:
@@ -111,18 +110,41 @@
     k3s_status: "{{ ansible_facts.services['k3s-agent.service']['state'] | default('absent') }}"
   when: "k3s_status != 'running' and 'k3s-agent.service' in ansible_facts.services"
 
-# ToDo: let users define their own, immutable join token
-- name: If we're not in a cluster, perform the node registration tasks
+- name: Set initial empty flags list
+  ansible.builtin.set_fact:
+    flags: []
+
+- name: Add bootstrap flags if this is the bootstrap node
+  ansible.builtin.set_fact:
+    flags: "{{ flags + ['--cluster-init'] }}"
+  when: k3s_bootstrap_node | bool
+
+- name: Add --disable traefik on all ctrlplane nodes
+  when: k3s_control_plane_node | bool or k3s_bootstrap_node | bool
+  ansible.builtin.set_fact:
+    flags: "{{ flags + ['--disable', 'traefik'] }}"
+
+- name: Add flannel backend flag if this is a server node
+  ansible.builtin.set_fact:
+    flags: "{{ flags + ['--flannel-backend=wireguard-native'] }}"
+  when: k3s_control_plane_node | bool or k3s_bootstrap_node | bool
+
+- name: Add join flags if this is not the bootstrap node
+  ansible.builtin.set_fact:
+    flags: "{{ flags + ['--server', 'https://' + k3s_bootstrap_node_ip + ':6443'] }}"
+  when: not k3s_bootstrap_node | bool
+
+- name: Add the token flag when defined
+  ansible.builtin.set_fact:
+    flags: "{{ flags + ['--token', k3s_join_token] }}"
+  when: k3s_join_token is defined
+
+- name: Install K3s with the constructed flags
   become: true
-  when: k3s_status != 'running' or k3s_force_reinstall
-  vars:
-    cluster_bootstrap_flags: "{{ '--cluster-init' if k3s_bootstrap_node else '' }}"
-    node_role: "{{ 'server' if k3s_control_plane_node or k3s_bootstrap_node else 'agent' }}"
-    join_flags: "{{ '--server https://' + k3s_bootstrap_node_ip + ':6443 --token ' + k3s_join_token if not k3s_bootstrap_node else '' }}"
   ansible.builtin.command:
-    cmd: >
-      /opt/k3s/install.sh {{ node_role }}
-      {{ join_flags }}
-      {{ cluster_bootstrap_flags }}
+    cmd: /opt/k3s/install.sh {{ node_role }} {{ flags | join(' ') }}
+  when: k3s_status != 'running' or k3s_force_reinstall
   environment:
     INSTALL_K3S_SKIP_DOWNLOAD: "true"
+  vars:
+    node_role: "{{ 'server' if k3s_control_plane_node or k3s_bootstrap_node else 'agent' }}"
