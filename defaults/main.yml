@@ -46,8 +46,6 @@ k3s_clusterjoin_address: false
 #   In most cases, we can automatically discover this, check out the playbook example - it does that out of the box!
 k3s_bootstrap_node_ip: false
 
-k3s_bootstrap_node_token: false
-
 # @var k3s_force_reinstall:description: >
 #   If true, rerun the k3s install script even if the node is already part of a cluster.
 k3s_force_reinstall: false
@@ -57,3 +55,8 @@ k3s_force_reinstall: false
 #   For syntax refer to https://docs.k3s.io/installation/private-registry
 #   The data you pass in here will be DIRECTLY templated into the registries.yaml file.
 k3s_registries_yaml: false
+
+# @var k3s_uninstall:description: >
+#   If true, the playbook will run the default uninstall script (/usr/local/bin/k3s-uninstall.sh)
+#   This is intended mostly for quick testing - in production, ideally you'd reprovision freshly.
+k3s_uninstall: false

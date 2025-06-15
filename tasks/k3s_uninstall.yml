@@ -1,0 +1,11 @@
+---
+- name: Check if the uninstall script exists
+  ansible.builtin.stat:
+    path: /usr/local/bin/k3s-uninstall.sh
+  register: stat_k3s_uninstall_script
+
+- name: Uninstall K3s if force reinstall is enabled
+  become: true
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s-uninstall.sh
+  when: stat_k3s_uninstall_script.stat.exists

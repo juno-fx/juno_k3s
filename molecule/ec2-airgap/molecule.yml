@@ -46,12 +46,15 @@ platforms:
         from_port: 10250
         to_port: 10250
         group_name: molecule-juno_k3s-tests
-        # ToDo: switch to flannel wireguard. VXLAN is unencrypted.
-        # We just need to validate the kernel modules/etc. are present in pre-flight first, otherwise we might get errors across different distros.
       - proto: udp
         rule_desc: flannel_vxlan
         from_port: 8472
         to_port: 8472
+        group_name: molecule-juno_k3s-tests
+      - proto: udp
+        rule_desc: flannel_vxlan_wireguard_ipv4
+        from_port: 51820
+        to_port: 51820
         group_name: molecule-juno_k3s-tests
     security_group_rules_egress:
       - proto: -1

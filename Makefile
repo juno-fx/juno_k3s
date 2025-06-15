@@ -53,6 +53,9 @@ converge-airgap-rocky95: converge-airgap-rocky95
 test-airgap-debian12: test-airgap-debian12
 test-airgap-ubuntu22: test-airgap-ubuntu22
 test-airgap-rocky95: test-airgap-rocky95
+destroy-airgap-debian12: destroy-airgap-debian12
+destroy-airgap-ubuntu22: destroy-airgap-ubuntu22
+destroy-airgap-rocky95: destroy-airgap-rocky95
 converge-debian12: converge-debian12
 converge-ubuntu22: converge-ubuntu22
 converge-rocky95: converge-rocky95
