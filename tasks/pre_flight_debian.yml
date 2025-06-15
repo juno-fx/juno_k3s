@@ -1,0 +1,10 @@
+---
+- name: Assert we are on a supported major version of Debian
+  when: validate_os_version
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution_major_version | string in supported_major_versions
+    fail_msg: "This Ansible role is only supported on {{ supported_major_versions | join(', ') }} Debian versions."
+  vars:
+    supported_major_versions:
+      - "12"
