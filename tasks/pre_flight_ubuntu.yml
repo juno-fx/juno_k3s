@@ -1,10 +1,10 @@
 ---
-- name: Assert we are on support major version of Ubuntu
+- name: Assert we are on a supported major version of Ubuntu
+  when: validate_os_version
   ansible.builtin.assert:
     that:
       - ansible_distribution_major_version | string in supported_major_versions
-    fail_msg: "This Ansible role is only supported on  22.x."
+    fail_msg: "This Ansible role is only supported on {{ supported_major_versions | join(', ') }} Ubuntu versions."
   vars:
     supported_major_versions:
-      - "22"
       - "24"
