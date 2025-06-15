@@ -20,7 +20,6 @@ your role description
 | k3s_binary_url |  | ['  URL for the k3s binary. Can be http://, https:// OR file://', '  When using file://, a path from your ansible control host (where your run the playbook from) will be used.', '  The files will be copied to the remote kubernetes hosts. This is useful for airgap installs.'] |
 | k3s_bootstrap_node |  | ['  The node used to bootstrap the cluster. This should only ever be a single node in your inventory!', '  The playbook example we provide discovers this dynamically, but you can also set it manually.'] |
 | k3s_bootstrap_node_ip |  | ['  The IP address of an existing controlplane node, used to join the cluster.', '  In most cases, we can automatically discover this, check out the playbook example - it does that out of the box!'] |
-| k3s_bootstrap_node_token |  |  |
 | k3s_clusterjoin_address |  | ['The address of the cluster to join. Can only be false when k3s_bootstrap_node is true.'] |
 | k3s_control_plane_node |  | ['  When true, join the node to an existing cluster as a control plane node.', '  When neither k3s_bootstrap_node nor k3s_control_plane_node is true, the node will be a worker node.'] |
 | k3s_force_reinstall |  | ['  If true, rerun the k3s install script even if the node is already part of a cluster.'] |
@@ -28,6 +27,7 @@ your role description
 | k3s_install_script_url |  | ['  URL for the k3s install script. Can be http://, https:// OR file://', '  When using file://, a path from your ansible control host (where your run the playbook from) will be used.', '  The files will be copied to the remote kubernetes hosts. This is useful for airgap installs.'] |
 | k3s_join_token |  | ['  The token used to join the cluster. You can specify it explicitly or let the playbook autodiscover it.', '  Check out the example playbook for how to do that.', 'k3s_join_token: false'] |
 | k3s_registries_yaml |  | ['  If true, the playbook will configure the registries.yaml file to use your internal mirror.', '  For syntax refer to https://docs.k3s.io/installation/private-registry', '  The data you pass in here will be DIRECTLY templated into the registries.yaml file.'] |
+| k3s_uninstall |  | ['  If true, the playbook will run the default uninstall script (/usr/local/bin/k3s-uninstall.sh)', "  This is intended mostly for quick testing - in production, ideally you'd reprovision freshly."] |
 | validate_os_version |  | ['Check we are on a supported OS version, error otherwise.'] |
 
 
@@ -46,6 +46,18 @@ your role description
         path: /var/lib/rancher/k3s/server/token
       become: true
       register: stat_k3s_bootstrap_node_token_file
+    - name: If the token exists on any node, set the skip_bootstrap variable
+      ansible.builtin.set_fact:
+        k3s_skip_bootstrap: false
+      when: stat_k3s_bootstrap_node_token_file.stat.exists
+      run_once: true
+
+    - name: Make k3s_skip_bootstrap available to all hosts
+      ansible.builtin.set_fact:
+        k3s_skip_bootstrap: "{{ k3s_skip_bootstrap | default(false) }}"
+      loop: "{{ ansible_play_hosts }}"
+      delegate_to: "{{ item }}"
+      run_once: true
     
     - any_errors_fatal: true
       block:
@@ -66,6 +78,7 @@ your role description
               )
             - not stat_k3s_bootstrap_node_token_file.stat.exists
             - k3s_control_plane_node | default(false) | bool
+            - not k3s_skip_bootstrap | default(false)
 
 
     - name: Check if the join token file exists (again)
@@ -132,6 +145,18 @@ You can check the detailed information for each file in the vars section above.
         path: /var/lib/rancher/k3s/server/token
       become: true
       register: stat_k3s_bootstrap_node_token_file
+    - name: If the token exists on any node, set the skip_bootstrap variable
+      ansible.builtin.set_fact:
+        k3s_skip_bootstrap: false
+      when: stat_k3s_bootstrap_node_token_file.stat.exists
+      run_once: true
+
+    - name: Make k3s_skip_bootstrap available to all hosts
+      ansible.builtin.set_fact:
+        k3s_skip_bootstrap: "{{ k3s_skip_bootstrap | default(false) }}"
+      loop: "{{ ansible_play_hosts }}"
+      delegate_to: "{{ item }}"
+      run_once: true
 
     - any_errors_fatal: true
       block:
@@ -141,9 +166,18 @@ You can check the detailed information for each file in the vars section above.
           ansible.builtin.include_role:
             name: "juno-fx.juno_k3s"
           when:
-            - inventory_hostname == (ansible_play_hosts | selectattr('k3s_control_plane_node', 'defined') | selectattr('k3s_control_plane_node', 'equalto', true) | first).inventory_hostname
+            - inventory_hostname == (
+                ansible_play_hosts_all
+                | map('extract', hostvars)
+                | selectattr('k3s_control_plane_node', 'defined')
+                | selectattr('k3s_control_plane_node', 'equalto', true)
+                | map(attribute='inventory_hostname')
+                | list
+                | first
+              )
             - not stat_k3s_bootstrap_node_token_file.stat.exists
             - k3s_control_plane_node | default(false) | bool
+            - not k3s_skip_bootstrap | default(false)
 
     - name: Check if the join token file exists (again)
       ansible.builtin.stat:

@@ -1,5 +1,0 @@
----
-# ToDo: ensure wireguard kernel modules for encrypted internode traffic
-- name: Ensure stuff
-  ansible.builtin.debug:
-    msg: "This is a placeholder task to ensure the system setup runs correctly."

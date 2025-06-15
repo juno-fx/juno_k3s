@@ -28,3 +28,11 @@
       - k3s_images_url | length > 0
       - "'http://' in k3s_images_url or 'https://' in k3s_images_url or 'file://' in k3s_images_url"
     fail_msg: "k3s_images_url must be a valid URL or file path, preceded by http://, https:// or file://"
+
+- name: If this is not a bootstrap node, ensure the join token is defined
+  ansible.builtin.assert:
+    that:
+      - k3s_join_token is not none
+      - k3s_join_token | length > 0
+    fail_msg: "k3s_join_token must be defined when not bootstrapping a new cluster"
+  when: not k3s_bootstrap_node | bool
