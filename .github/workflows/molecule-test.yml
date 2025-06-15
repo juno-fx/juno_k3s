@@ -8,7 +8,7 @@ jobs:
     strategy:
       max-parallel: 1 # this can be faster, working on it :)
       matrix:
-        os-target: [ubuntu22, debian12, rocky95]
+        os-target: [ubuntu22, ubuntu24, debian12, rocky95]
     steps:
       - name: Checkout the code
         uses: actions/checkout@v4
