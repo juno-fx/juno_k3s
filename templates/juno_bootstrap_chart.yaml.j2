@@ -1,0 +1,24 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: juno-bootstrap
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: default
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: chart/
+    repoURL: "{{ juno_bootstrap_git_url }}"
+    targetRevision: "{{ juno_bootstrap_chart_repo_revision }}"
+    helm:
+{% if juno_bootstrap_chart_values %}
+      values: |
+        {{ juno_bootstrap_chart_values | to_yaml | indent(6) }}
+{% endif %}
+  syncPolicy:
+    automated: {}

@@ -4,5 +4,6 @@ collections:
     version: 2.26.2
   - name: amazon.aws
     version: 9.5.0
-
+  - name: containers.podman
+    version: 1.16.3
 

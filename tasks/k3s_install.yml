@@ -28,6 +28,20 @@
     group: root
   become: true
 
+- name: Check if the binary exists, get its checksum
+  ansible.builtin.stat:
+    path: /usr/local/bin/k3s
+  register: k3s_binary_stat
+  become: true
+  failed_when: false
+
+- name: When copying from a local file, checksum it
+  delegate_to: localhost
+  ansible.builtin.stat:
+    path: "{{ k3s_binary_url | regex_replace('^file://', '') }}"
+  register: k3s_binary_local_stat
+  when: "'file://' in k3s_binary_url"
+
 - name: Download the k3s binary (https/s fetch)
   when: "'http://' in k3s_binary_url or 'https://' in k3s_binary_url"
   ansible.builtin.get_url:
@@ -38,32 +52,12 @@
     group: root
   become: true
 
-- name: Download the k3s images (https/s fetch)
-  when:
-    - "'http://' in k3s_images_url or 'https://' in k3s_images_url"
-    - k3s_airgap_install
-  ansible.builtin.get_url:
-    url: "{{ k3s_images_url }}"
-    dest: "/var/lib/rancher/k3s/agent/images/{{ k3s_images_url | basename }}"
-    mode: "0644"
-    owner: root
-    group: root
-  become: true
-
-- name: Copy over the install script (file:// k3s_install_script_url)
-  when:
-    - "'file://' in k3s_install_script_url"
-    - k3s_airgap_install
-  ansible.builtin.copy:
-    src: "{{ k3s_install_script_url | regex_replace('^file://', '') }}"
-    dest: /opt/k3s/install.sh
-    mode: "0755"
-    owner: root
-    group: root
-  become: true
-
+# ToDo: validate the checksum handling here. Something's odd, the copy task takes forever despite ansible checking it on the upstream already: https://github.com/ansible/ansible/blob/240d1a6afb43982f16acebef16778d17aab58160/lib/ansible/plugins/action/copy.py#L283
 - name: Copy over the k3s binary (file:// k3s_binary_url)
-  when: "'file://' in k3s_binary_url"
+  when:
+    - "'file://' in k3s_binary_url"
+    - k3s_binary_stat.stat.exists == false or
+      (k3s_binary_stat.stat.exists and k3s_binary_local_stat.stat.checksum != k3s_binary_stat.stat.checksum)
   ansible.builtin.copy:
     src: "{{ k3s_binary_url | regex_replace('^file://', '') }}"
     dest: /usr/local/bin/k3s
@@ -72,12 +66,36 @@
     group: root
   become: true
 
+- name: Download the k3s images (https/s fetch)
+  when:
+    - "'http://' in k3s_images_url or 'https://' in k3s_images_url"
+    - k3s_copy_images
+  ansible.builtin.get_url:
+    url: "{{ k3s_images_url }}"
+    dest: "/var/lib/rancher/k3s/agent/images/{{ k3s_images_url | basename }}"
+    mode: "0644"
+    owner: root
+    group: root
+  become: true
+
 - name: Copy over the k3s images (file:// k3s_images_url)
-  when: "'file://' in k3s_images_url"
+  when:
+    - "'file://' in k3s_images_url"
+    - k3s_copy_images
   ansible.builtin.copy:
     src: "{{ k3s_images_url | regex_replace('^file://', '') }}"
     dest: "/var/lib/rancher/k3s/agent/images/{{ k3s_images_url | basename }}"
     mode: "0644"
+    owner: root
+    group: root
+  become: true
+
+- name: Copy over the install script (file:// k3s_install_script_url)
+  when: "'file://' in k3s_install_script_url"
+  ansible.builtin.copy:
+    src: "{{ k3s_install_script_url | regex_replace('^file://', '') }}"
+    dest: /opt/k3s/install.sh
+    mode: "0755"
     owner: root
     group: root
   become: true
@@ -92,8 +110,8 @@
   become: true
 
 - name: Template in registries.yaml
-  when: "k3s_registries_yaml | default(False) | bool"
-  ansible.builtin.template:
+  when: "k3s_registries_yaml != false"
+  ansible.builtin.copy:
     content: "{{ k3s_registries_yaml }}"
     dest: /etc/rancher/k3s/registries.yaml
     owner: root
@@ -138,6 +156,11 @@
   ansible.builtin.set_fact:
     flags: "{{ flags + ['--token', k3s_join_token] }}"
   when: k3s_join_token is defined
+
+- name: Add the node-label flags
+  ansible.builtin.set_fact:
+    flags: "{{ flags + (k3s_node_labels | map('regex_replace', '^(.*)$', '--node-label \\1') | list) }}"
+  when: k3s_perform_node_labeling
 
 - name: Install K3s with the constructed flags
   become: true

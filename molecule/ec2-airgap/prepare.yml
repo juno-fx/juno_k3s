@@ -1,4 +1,231 @@
 ---
+# Notes on setting up a git host: https://gist.github.com/Kreijstal/28fc987270b71849505bbc89b3f2d90a
+# ToDo: add nvcr.io if we start testing GPU workloads within molecule/reproducing any bugs related to them
+- name: Prepare the airgap-proxy host, simulating an airgapped env's local git&OCI repositories
+  hosts: airgap_proxy
+  gather_facts: true
+  tasks:
+    - name: Install packages needed to mimick an airgapped environment
+      ansible.builtin.package:
+        update_cache: true
+        name:
+          - podman
+          - nginx
+          - git
+          # used for git-http-backend
+          - fcgiwrap
+          # provides htpasswd
+          - "{{ 'apache2-utils' if ansible_os_family == 'Debian' else 'httpd-tools' }}"
+        state: present
+      become: true
+    - name: Create /srv/git
+      become: true
+      ansible.builtin.file:
+        owner: www-data
+        path: /srv/git
+        state: directory
+
+    - name: Start up fcgiwrap
+      become: true
+      ansible.builtin.systemd:
+        name: fcgiwrap
+        state: started
+        enabled: true
+
+    - name: Clone down Juno-Bootstrap to /srv/git/Juno-Bootstrap
+      become: true
+      failed_when: false
+      ansible.builtin.git:
+        repo: https://github.com/juno-fx/Juno-Bootstrap.git
+        dest: /srv/git/Juno-Bootstrap.git
+        version: "main"
+        force: true
+        update: true
+        accept_hostkey: true
+        clone: true
+
+    - name: Clone down the Genesis Deployment repo to /srv/git/Genesis-Deployment
+      become: true
+      ansible.builtin.git:
+        repo: https://github.com/juno-fx/Genesis-Deployment.git
+        dest: /srv/git/Genesis-Deployment.git
+        version: "v1.1"
+        force: true
+        update: true
+        accept_hostkey: true
+
+    - name: Set ownership on /srv/git recursively to www-data
+      become: true
+      ansible.builtin.file:
+        path: /srv/git
+        owner: www-data
+        group: www-data
+        mode: "0755"
+        state: directory
+        recurse: true
+
+    - name: Adjust nginx conf to serve the git repos with username:password basic auth
+      become: true
+      ansible.builtin.copy:
+        dest: /etc/nginx/nginx.conf
+        mode: "0644"
+        owner: root
+        group: root
+        content: |
+          user www-data;
+          worker_processes auto;
+          pid /run/nginx.pid;
+          error_log /var/log/nginx/error.log;
+          include /etc/nginx/modules-enabled/*.conf;
+
+          events {
+          	worker_connections 768;
+          	# multi_accept on;
+          }
+
+          http {
+          	sendfile on;
+          	tcp_nopush on;
+          	types_hash_max_size 2048;
+
+          	include /etc/nginx/mime.types;
+          	default_type application/octet-stream;
+
+          	access_log /var/log/nginx/access.log;
+
+          	gzip on;
+          	server {
+          		 listen 80 default_server;
+          	    set $git_root /srv/git;
+          		  # Serve Git repositories under /git/
+          		  location ~ ^/git/([^/]+\.git)(/.*)?$ {
+          		    include fastcgi_params;
+          		    fastcgi_param SCRIPT_FILENAME /usr/lib/git-core/git-http-backend;
+          		    fastcgi_param GIT_PROJECT_ROOT $git_root;
+          			  fastcgi_param GIT_HTTP_EXPORT_ALL "1"; # Allow access without git-daemon-export-ok
+          			  fastcgi_param PATH_INFO /$1$2; # Repo name + subpath (e.g., /myrepo.git/info/refs)
+          			  fastcgi_param REQUEST_METHOD $request_method;
+          			  fastcgi_param QUERY_STRING $query_string;
+          			  fastcgi_pass unix:/var/run/fcgiwrap.socket;
+                }
+             }
+          }
+
+
+    - name: Create the nginx htpasswd file
+      become: true
+      ansible.builtin.command:
+        cmd: htpasswd -cb /etc/nginx/.htpasswd oauth2 password
+        creates: /etc/nginx/.htpasswd
+
+    - name: Reload nginx
+      become: true
+      ansible.builtin.systemd:
+        name: nginx
+        state: reloaded
+
+    - name: Create /opt/dockerhub_mirror/etc/docker/registry
+      become: true
+      ansible.builtin.file:
+        path: /opt/dockerhub_mirror/etc/docker/registry
+        state: directory
+
+    - name: Create /opt/quay_io_mirror/etc/docker/registry
+      become: true
+      ansible.builtin.file:
+        path: /opt/quay_io_mirror/etc/docker/registry
+        state: directory
+    
+    - name: Create /opt/ghcr_io_mirror/etc/docker/registry
+      become: true
+      ansible.builtin.file:
+        path: /opt/ghcr_io_mirror/etc/docker/registry
+        state: directory
+
+    - name: Write in the contents of /opt/dockerhub_mirror/etc/docker/registry/config.yml
+      become: true
+      ansible.builtin.copy:
+        dest: /opt/dockerhub_mirror/etc/docker/registry/config.yml
+        mode: "0644"
+        owner: root
+        group: root
+        # ToDo: add a test case for auth-enabled registries
+        content: |
+          version: 0.1
+          proxy:
+           remoteurl: https://registry-1.docker.io
+          storage:
+            filesystem:
+              rootdirectory: /var/lib/registry
+          http:
+            addr: 0.0.0.0:5000
+
+    - name: Write in the contents of /opt/quay_io_mirror/etc/docker/registry/config.yml
+      become: true
+      ansible.builtin.copy:
+        dest: /opt/quay_io_mirror/etc/docker/registry/config.yml
+        mode: "0644"
+        owner: root 
+        group: root
+        content: |
+          version: 0.1
+          proxy:
+           remoteurl: https://quay.io
+          storage:
+            filesystem:
+              rootdirectory: /var/lib/registry
+          http:
+            addr: 0.0.0.0:5000
+
+    - name: Write in the contents of /opt/ghcr_io_mirror/etc/docker/registry/config.yml
+      become: true
+      ansible.builtin.copy:
+        dest: /opt/ghcr_io_mirror/etc/docker/registry/config.yml
+        mode: "0644"
+        owner: root 
+        group: root
+        content: |
+          version: 0.1
+          proxy:
+           remoteurl: https://ghcr.io
+          storage:
+            filesystem:
+              rootdirectory: /var/lib/registry
+          http:
+            addr: 0.0.0.0:5000
+
+    - name: Spin up a pull-through OCI registry container, pointed to dockerhub
+      become: true
+      containers.podman.podman_container:
+        name: oci-registry
+        image: registry:2
+        volumes:
+          - /opt/dockerhub_mirror/etc/docker/registry:/etc/docker/registry
+        state: started
+        ports:
+          - "5000:5000"
+
+    - name: Spin up a pull-through OCI registry container, pointed to quay.io
+      become: true
+      containers.podman.podman_container:
+        name: quay-oci-registry
+        image: registry:2
+        volumes:
+          - /opt/quay_io_mirror/etc/docker/registry:/etc/docker/registry
+        state: started
+        ports:
+          - "5001:5000"
+    - name: Spin up a pull-through OCI registry container, pointed to ghcr.io
+      become: true
+      containers.podman.podman_container:
+        name: ghcr-oci-registry
+        image: registry:2
+        volumes:
+          - /opt/ghcr_io_mirror/etc/docker/registry:/etc/docker/registry
+        state: started
+        ports:
+          - "5002:5000"
+
 # This contains all the prereqs we expect the user to perform before an airgap install
 - name: Gather airgap install files the user would place on the host on their own
   hosts: localhost
@@ -18,10 +245,10 @@
         url: "https://github.com/k3s-io/k3s/releases/download/v1.33.1%2Bk3s1/k3s"
         dest: "{{ playbook_dir }}/airgap_files/k3s"
         mode: "0644"
-    - name: Download the k3s images to the airgap_files directory
+    - name: Download the argo deployment manifests
       ansible.builtin.get_url:
-        url: "https://github.com/k3s-io/k3s/releases/download/v1.33.1%2Bk3s1/k3s-airgap-images-amd64.tar.zst"
-        dest: "{{ playbook_dir }}/airgap_files/k3s-airgap-images-amd64.tar.zst"
+        url: "https://raw.githubusercontent.com/argoproj/argo-cd/v3.0.9/manifests/install.yaml"
+        dest: "{{ playbook_dir }}/airgap_files/argo-install.yaml"
         mode: "0644"
 
 - name: Prepare k8s hosts
@@ -41,3 +268,4 @@
         cmd: setenforce 0
       when: "'selinux' in ansible_facts.services"
       become: true
+

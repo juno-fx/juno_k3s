@@ -6,6 +6,55 @@ driver:
 # security groups cannot be defined outside one of those items - so they must live in the list here.
 # Not the cleanest, but necessary.
 platforms:
+  - name: airgap_proxy
+    groups:
+      - airgap_proxy
+    image: "${AWS_AMI_ID}"
+    instance_type: "${AWS_INSTANCE_TYPE}"
+    ssh_user: molecule
+    vpc_subnet_id: "${AWS_VPC_SUBNET_ID}"
+    region: "${AWS_REGION}"
+    tags:
+      Name: molecule_k8s_worker01
+      molecule: true
+    security_group_name: molecule-juno_k3s-airgap-proxy
+    security_group_rules:
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: "0.0.0.0/0"
+        # mock git server to host "forks" of Juno-Bootstrap and Genesis-Deployment
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: "10.0.0.0/8"
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: "172.16.0.0/12"
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: "192.168.0.0/16"
+      # docker registry cache
+      - proto: tcp
+        from_port: 5000
+        to_port: 5002
+        cidr_ip: "10.0.0.0/8"
+      - proto: tcp
+        from_port: 5000
+        to_port: 5002
+        cidr_ip: "172.16.0.0/12"
+      - proto: tcp
+        from_port: 5000
+        to_port: 5002
+        cidr_ip: "192.168.0.0/16"
+    security_group_rules_egress:
+      - proto: -1
+        from_port: 0
+        to_port: 0
+        cidr_ip: "0.0.0.0/0"
+
   - name: k8s_control_plane01
     groups:
       - control_plane

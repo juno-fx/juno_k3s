@@ -1,11 +1,45 @@
 ---
-- name: Ensure the correct state of all nodes in the cluster
+### BEGIN-TEST-ONLY ###
+# sed is used to replace the above out from the readme we render and make it more readable
+- name: Get the IP of the airgap-proxy using ec2_instance_facts
   hosts: all
+  gather_facts: true
+  tasks:
+    - name: Set the IP address of airgap proxy as proxy_address for all hosts
+      ansible.builtin.set_fact:
+        proxy_address: "{{ hostvars['airgap_proxy'].ansible_default_ipv4.address }}"
+      when: inventory_hostname != 'airgap_proxy'
+### END-TEST-ONLY ###
+
+- name: Ensure the correct state of all nodes in the cluster
+  hosts:
+    - control_plane
+    - k8s_worker
   vars:
+    juno_git_user: "oauth2"
+    juno_git_password: "password"
+    juno_genesis_deployment_git_url: "http://{{ proxy_address }}/git/Genesis-Deployment.git"
+    argo_install_manifest_url: "file://{{ playbook_dir }}/airgap_files/argo-install.yaml"
+    juno_bootstrap_git_url: "http://{{ proxy_address }}/git/Juno-Bootstrap.git"
     k3s_install_script_url: "file://{{ playbook_dir }}/airgap_files/install.sh"
     k3s_binary_url: "file://{{ playbook_dir }}/airgap_files/k3s"
-    k3s_images_url: "file://{{ playbook_dir }}/airgap_files/k3s-airgap-images-amd64.tar.zst"
+    # For more details on using a private registry, eg. using authentication, see:
+    # https://docs.k3s.io/installation/private-registry
+    k3s_registries_yaml: |
+      mirrors:
+        docker.io:
+          endpoint:
+            - "http://{{ proxy_address }}:5000"
+        quay.io:
+          endpoint:
+            - "http://{{ proxy_address }}:5001"
+        ghcr.io:
+          endpoint:
+            - "http://{{ proxy_address }}:5002"
     k3s_airgap_install: true
+    juno_bootstrap_chart_values:
+      genesis:
+        repoURL: "http://{{ proxy_address }}/git/Genesis-Deployment.git"
   tasks:
     - name: Check if the join token file exists
       ansible.builtin.stat:

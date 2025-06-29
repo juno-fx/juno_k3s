@@ -9,3 +9,7 @@
 - name: Include k3s_install tasks
   ansible.builtin.include_tasks: k3s_install.yml
   when: not k3s_uninstall | bool
+
+- name: Bootstrap Juno
+  when: juno_install and k3s_control_plane_node
+  ansible.builtin.include_tasks: juno_install.yml
