@@ -11,7 +11,7 @@ export AWS_INSTANCE_TYPE ?= t2.large
 
 venv/bin/activate:
 	python3 -m venv venv
-	. venv/bin/activate; pip install -r requirements.txt
+	. venv/bin/activate; python3 -m pip install -r requirements.txt
 	. venv/bin/activate; ansible-galaxy install -r test_requirements.yml
 
 docs: venv/bin/activate
@@ -23,13 +23,24 @@ docs: venv/bin/activate
 	sed -i '$$a{% endraw %}' docs/readme/molecule_converge_online_escaped.yml
 	sed -i '1s/^/{% raw %}\n/' docs/readme/molecule_converge_airgapped_escaped.yml
 	sed -i '$$a{% endraw %}' docs/readme/molecule_converge_airgapped_escaped.yml
+	sed -i '/### BEGIN-TEST-ONLY ###/,/### END-TEST-ONLY ###/d' docs/readme/molecule_converge_online_escaped.yml
+	sed -i '/### BEGIN-TEST-ONLY ###/,/### END-TEST-ONLY ###/d' docs/readme/molecule_converge_airgapped_escaped.yml
 	ansible-doctor
 
 login-%: venv/bin/activate
 	. venv/bin/activate; venv/bin/molecule login -s ec2 --host k8s_${*}
 
+login-airgap-%: venv/bin/activate
+	. venv/bin/activate; venv/bin/molecule login -s ec2-airgap --host k8s_${*}
+
+login-airgap-proxy: venv/bin/activate
+	. venv/bin/activate; venv/bin/molecule login -s ec2-airgap --host airgap_proxy
+
 converge-airgap-%: venv/bin/activate
 	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} venv/bin/molecule converge -s ec2-airgap
+
+prepare-airgap-%: venv/bin/activate
+	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} venv/bin/molecule prepare -f -s ec2-airgap
 
 test-airgap-%: venv/bin/activate
 	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} venv/bin/molecule test -s ec2-airgap
@@ -76,3 +87,7 @@ login-control_plane01: login-control_plane01
 login-control_plane02: login-control_plane02
 login-control_plane03: login-control_plane03
 login-worker01: login-worker01
+login-airgap-control_plane01: login-airgap-control_plane01
+login-airgap-control_plane02: login-airgap-control_plane02
+login-airgap-control_plane03: login-airgap-control_plane03
+login-airgap-worker01: login-airgap-worker01

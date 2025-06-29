@@ -53,10 +53,76 @@ k3s_force_reinstall: false
 # @var k3s_registries_yaml:description: >
 #   If true, the playbook will configure the registries.yaml file to use your internal mirror.
 #   For syntax refer to https://docs.k3s.io/installation/private-registry
-#   The data you pass in here will be DIRECTLY templated into the registries.yaml file.
+#   The data you pass in here will be directly templated into the registries.yaml file.
 k3s_registries_yaml: false
 
 # @var k3s_uninstall:description: >
 #   If true, the playbook will run the default uninstall script (/usr/local/bin/k3s-uninstall.sh)
 #   This is intended mostly for quick testing - in production, ideally you'd reprovision freshly.
 k3s_uninstall: false
+
+# @var juno_install:description: >
+#   Bootstrap Juno's Orion using https://github.com/juno-fx/Juno-Bootstrap
+juno_install: true
+
+# @var argo_install_manifest_url:description: >
+#   The URL of the ArgoCD install manifest. This can be a file://, http:// or https:// URL.
+#   If you use file://, the file will be copied from your Ansible control host to the remote hosts.
+argo_install_manifest_url: https://raw.githubusercontent.com/argoproj/argo-cd/v3.0.9/manifests/install.yaml
+
+# @var juno_bootstrap_git_url:description: >
+#   The URL of the Juno-Bootstrap repository. This only needs to be adjusted if you forked it or are using an airgapped environment.
+juno_bootstrap_git_url: "https://github.com/juno-fx/Juno-Bootstrap.git"
+# @var juno_bootstrap_chart_repo_revision:description: >
+#   The revision of the Juno-Bootstrap repository to use. This can be a branch name, tag or commit hash.
+juno_bootstrap_chart_repo_revision: "main"
+
+# @var juno_genesis_deployment_git_url:description: >
+#   The URL of the Genesis-Deployment repository. Note you still need to set the juno_bootstrap_chart_values.genesis.url value to point to the Genesis-Deployment repository.
+#   This argument is only used to create the git sercet. It can be left empty on a default, non-airgapped install.
+juno_genesis_deployment_git_url: "https://github.com/juno-fx/Genesis-Deployment.git"
+
+# @var juno_bootstrap_chart_values:description: >
+#   Values to pass to the Juno Bootstrap chart. See: https://github.com/juno-fx/Juno-Bootstrap
+#  If you do not use a direct OCI proxy and leverage the k3s_registries_yaml var, you also could need to adjust the repository from which to pull images.
+#  For details, see: https://github.com/juno-fx/Juno-Bootstrap and the example airgapped playbook.
+juno_bootstrap_chart_values: {}
+
+# @var juno_git_username:description: >
+#   The username used to authenticate with all Juno repositories you specified. This is needed when you use a private fork of the Juno Bootstrap repository.
+#   It is particularly useful in airgapped environments, where you might neither have access to the public version and might require authentication on your Git host.
+juno_git_username: oauth2
+# @var juno_git_password:description: >
+#   The password used to authenticate with all Juno repositories you specified. If left to the default (false), a public repository is assumed.
+juno_git_password: false
+
+# @var juno_bootstrap_git_username:description: >
+#   This authenticates only the Juno-Bootstrap repository. You can leave it unchanged if both Juno-Bootstrap and Genesis-Deployment are accessible via juno_git_username&juno_git_password.
+juno_bootstrap_git_username: "{{ juno_git_username }}"
+# @var juno_bootstrap_git_password:description: >
+#  This authenticates only the Juno-Bootstrap repository. You can leave it unchanged if both Juno-Bootstrap and Genesis-Deployment are accessible via juno_git_username&juno_git_password.
+juno_bootstrap_git_password: "{{ juno_git_password }}"
+
+# @var juno_genesis_deployment_git_username:description: >
+#   This authenticates only the Juno Genesis Deployment repository. You can leave it unchanged if both Juno-Bootstrap and Genesis-Deployment are accessible via juno_git_username&juno_git_password.
+juno_genesis_deployment_git_username: "{{ juno_git_username }}"
+# @var juno_genesis_deployment_git_password:description: >
+#   This authenticates only the Juno Genesis Deployment repository. You can leave it unchanged if
+juno_genesis_deployment_git_password: "{{ juno_git_password }}"
+
+# @var k3s_perform_node_labeling:description: >
+#   Whether to label nodes when performing the initial k3s install.
+#   Already existing nodes will not be labeled - use kubectl instead, per: https://juno-fx.github.io/Orion-Documentation/installation/pre-reqs/requirements/?h=label#1-labeling-nodes
+k3s_perform_node_labeling: true
+
+# @var k3s_node_labels:description: >
+#   A list of labels to apply to a node on provisioning, only when k3s_perform_node_labeling is true.
+#   Defaults to making each control plane node a Juno service node and each worker node a workstation node.
+#   For details on how labels affect your Orion deployment, check out: https://juno-fx.github.io/Orion-Documentation/installation/pre-reqs/requirements/?h=label#1-labeling-nodes
+k3s_node_labels:
+  - "{{ k3s_control_plane_node | ternary('juno-innovations.com/service=true', 'juno-innovations.com/workstation=true') }}"
+
+# @var k3s_copy_images:description: >
+#   If true, the role will copy the k3s images tarball to the standard location where k3s can load them.
+#   By default, we don't perform this if you define registries.yaml, as it is assumed you will have a local mirror.
+k3s_copy_images: "{{ k3s_airgap_install and not k3s_registries_yaml }}"

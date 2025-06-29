@@ -1,0 +1,96 @@
+---
+- name: Create the argocd namespace
+  become: true
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl create namespace argocd 
+  register: argocd_namespace_result
+  failed_when: argocd_namespace_result.rc != 0 and('already exists' not in argocd_namespace_result.stderr)
+  changed_when: argocd_namespace_result.rc == 0
+
+- name: Download the argo deployment manifest (http/https)
+  when: argo_install_manifest_url.startswith('http://') or argo_install_manifest_url.startswith('https://')
+  become: true
+  ansible.builtin.get_url:
+    dest: /tmp/argo-install.yaml
+    url: "{{ argo_install_manifest_url }}"
+    mode: "0640"
+    owner: root
+    group: root
+
+- name: Download the argo deployment manifest (file)
+  when: argo_install_manifest_url.startswith('file://')
+  become: true
+  ansible.builtin.copy:
+    src: "{{ argo_install_manifest_url | regex_replace('^file://', '') }}"
+    dest: /tmp/argo-install.yaml
+    mode: "0640"
+    owner: root
+    group: root
+
+# We use raw kubectl instead of kubernetes.core.k8s to avoid python dependencies on the host
+- name: Deploy argo using kubectl
+  become: true
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /tmp/argo-install.yaml --namespace argocd 
+  register: argo_deploy_result
+  failed_when: argo_deploy_result.rc != 0 and "'already exists' not in argo_deploy_result.stderr"
+  changed_when: "('created' in argo_deploy_result.stdout) and argo_deploy_result.rc == 0"
+
+- name: Add credentials for juno bootstrap via kubectl raw input
+  become: true
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f - --namespace argocd
+  args:
+    stdin: |
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: juno-bootstrap-repo-secret
+        namespace: argocd
+        labels:
+          argocd.argoproj.io/secret-type: repository
+      stringData:
+        type: git
+        url: "{{ juno_bootstrap_git_url }}"
+        password: "{{ juno_bootstrap_git_password }}"
+        username: "{{ juno_bootstrap_git_username }}"
+  when: juno_bootstrap_git_password
+
+- name: Add credentials for Genesis-Deployment
+  become: true
+  when: juno_genesis_deployment_git_password
+  register: juno_genesis_deployment_git_password
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f - --namespace argocd
+  args:
+    stdin: |
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: juno-genesis-deployment-repo-secret
+        namespace: argocd
+        labels:
+          argocd.argoproj.io/secret-type: repository
+      stringData:
+        type: git
+        url: "{{ juno_genesis_deployment_git_url }}"
+        password: "{{ juno_genesis_deployment_git_password }}"
+        username: "{{ juno_genesis_deployment_git_username }}"
+  changed_when: "'created' in juno_genesis_deployment_git_password.stdout"
+
+- name: Template in the juno-bootstrap chart
+  become: true
+  ansible.builtin.template:
+    src: juno_bootstrap_chart.yaml.j2
+    dest: /root/juno_bootstrap_chart.yaml
+    mode: "0600"
+    owner: root
+    group: root
+
+- name: Deploy the Juno Bootstrap chart
+  become: true
+  register: juno_bootstrap_chart_deploy_result
+  failed_when: juno_bootstrap_chart_deploy_result.rc != 0 and "'already exists' not in juno_bootstrap_chart_deploy_result.stderr"
+  changed_when: "('configured' in juno_bootstrap_chart_deploy_result.stdout or 'created' in juno_bootstrap_chart_deploy_result.stdout) and juno_bootstrap_chart_deploy_result.rc == 0"
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl apply -f /root/juno_bootstrap_chart.yaml --namespace argocd

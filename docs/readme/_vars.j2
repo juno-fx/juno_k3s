@@ -4,6 +4,6 @@
 ## Role variables
 | Name | Default value | Description |
 |:-----|:--------------|:------------|
-{% for key, item in var | dictsort %}| {{ key }} | {{ item.default | default('') }} | {{ item.description | default('') }} |
+{% for key, item in var | dictsort %}| {{ key }} | {{ item.value[key] | default('') if item.value is defined else '' }} |{{ item.description | default([]) | join('') }} |
 {% endfor %}
 {% endif %}
