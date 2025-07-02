@@ -245,11 +245,6 @@
         url: "https://github.com/k3s-io/k3s/releases/download/v1.33.1%2Bk3s1/k3s"
         dest: "{{ playbook_dir }}/airgap_files/k3s"
         mode: "0644"
-    - name: Download the argo deployment manifests
-      ansible.builtin.get_url:
-        url: "https://raw.githubusercontent.com/argoproj/argo-cd/v3.0.9/manifests/install.yaml"
-        dest: "{{ playbook_dir }}/airgap_files/argo-install.yaml"
-        mode: "0644"
 
 - name: Prepare k8s hosts
   hosts: all

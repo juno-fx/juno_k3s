@@ -1,0 +1,43 @@
+resources:
+  # This is a direct copy of the ArgoCD install manifest.
+  # https://raw.githubusercontent.com/argoproj/argo-cd/v3.0.9/manifests/install.yaml
+  - argo_3.0.9.yaml
+
+images:
+- name: quay.io/argoproj/argocd
+  newName: {{ argocd_image_substitutions['quay.io/argoproj/argocd']['newName'] }}
+  newTag: {{ argocd_image_substitutions['quay.io/argoproj/argocd']['newTag'] }}
+- name: ghcr.io/dexidp/dex
+  newName: {{ argocd_image_substitutions['ghcr.io/dexidp/dex']['newName'] }}
+  newTag: {{ argocd_image_substitutions['ghcr.io/dexidp/dex']['newTag'] }}
+- name: docker.io/library/redis
+  newName: {{ argocd_image_substitutions['docker.io/library/redis']['newName'] }}
+  newTag: {{ argocd_image_substitutions['docker.io/library/redis']['newTag'] }}
+{% if argocd_image_pull_secret %}
+patches:
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: dummy
+      spec:
+        template:
+          spec:
+            imagePullSecrets:
+              - name: {{ argocd_image_pull_secret_name }}
+    target:
+      kind: Deployment
+      version: v1
+      group: apps
+
+  - patch: |-
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: dummy
+      spec:
+        template:
+          spec:
+            imagePullSecrets:
+              - name: {{ argocd_image_pull_secret_name }}
+{% endif %}
