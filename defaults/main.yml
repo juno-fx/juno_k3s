@@ -65,11 +65,6 @@ k3s_uninstall: false
 #   Bootstrap Juno's Orion using https://github.com/juno-fx/Juno-Bootstrap
 juno_install: true
 
-# @var argo_install_manifest_url:description: >
-#   The URL of the ArgoCD install manifest. This can be a file://, http:// or https:// URL.
-#   If you use file://, the file will be copied from your Ansible control host to the remote hosts.
-argo_install_manifest_url: https://raw.githubusercontent.com/argoproj/argo-cd/v3.0.9/manifests/install.yaml
-
 # @var juno_bootstrap_git_url:description: >
 #   The URL of the Juno-Bootstrap repository. This only needs to be adjusted if you forked it or are using an airgapped environment.
 juno_bootstrap_git_url: "https://github.com/juno-fx/Juno-Bootstrap.git"
@@ -126,3 +121,28 @@ k3s_node_labels:
 #   If true, the role will copy the k3s images tarball to the standard location where k3s can load them.
 #   By default, we don't perform this if you define registries.yaml, as it is assumed you will have a local mirror.
 k3s_copy_images: "{{ k3s_airgap_install and not k3s_registries_yaml }}"
+
+argocd_image_substitutions:
+  "quay.io/argoproj/argocd":
+    newName: "quay.io/argoproj/argocd"
+    newTag: "v3.0.9"
+  "ghcr.io/dexidp/dex":
+    newName: "ghcr.io/dexidp/dex"
+    newTag: "v2.41.1"
+  "docker.io/library/redis":
+    newName: "docker.io/library/redis"
+    newTag: "7.2.7-alpine"
+
+# @var argocd_image_pull_secret:description: >
+#   When set, the passed in credentials will be used to pull the ArgoCD images.
+#   Example:
+#     argocd_image_pull_secret:
+#       username: my-username
+#       password: my-password
+#       registry: my-registry.com
+
+argocd_image_pull_secret: false
+
+# @var argocd_image_pull_secret_name:description: >
+#   The name of the image pull secret to use for ArgoCD.
+argocd_image_pull_secret_name: "argo-image-pull-secret"

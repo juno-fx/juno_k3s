@@ -36,3 +36,12 @@
       - k3s_join_token | length > 0
     fail_msg: "k3s_join_token must be defined when not bootstrapping a new cluster"
   when: not k3s_bootstrap_node | bool
+
+- name: Validate required keys when argocd_image_pull_secret is set
+  ansible.builtin.assert:
+    that:
+      - argocd_image_pull_secret.registry is not none
+      - argocd_image_pull_secret.username is not none
+      - argocd_image_pull_secret.password is not none
+    fail_msg: "argocd_image_pull_secret must contain registry, username and password keys when set"
+  when: argocd_image_pull_secret is defined and argocd_image_pull_secret | bool

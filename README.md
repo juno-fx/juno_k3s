@@ -18,7 +18,9 @@ Supporting both airgapped and online environments
 ## Role variables
 | Name | Default value | Description |
 |:-----|:--------------|:------------|
-| argo_install_manifest_url | https://raw.githubusercontent.com/argoproj/argo-cd/v3.0.9/manifests/install.yaml |  The URL of the ArgoCD install manifest. This can be a file://, http:// or https:// URL.  If you use file://, the file will be copied from your Ansible control host to the remote hosts. |
+| argocd_image_pull_secret | False |  When set, the passed in credentials will be used to pull the ArgoCD images.  Example:    argocd_image_pull_secret:      username: my-username      password: my-password      registry: my-registry.com |
+| argocd_image_pull_secret_name | argo-image-pull-secret |  The name of the image pull secret to use for ArgoCD. |
+| argocd_image_substitutions | {'quay.io/argoproj/argocd': {'newName': 'quay.io/argoproj/argocd', 'newTag': 'v3.0.9'}, 'ghcr.io/dexidp/dex': {'newName': 'ghcr.io/dexidp/dex', 'newTag': 'v2.41.1'}, 'docker.io/library/redis': {'newName': 'docker.io/library/redis', 'newTag': '7.2.7-alpine'}} | |
 | juno_bootstrap_chart_repo_revision | main |  The revision of the Juno-Bootstrap repository to use. This can be a branch name, tag or commit hash. |
 | juno_bootstrap_chart_values | {} |  Values to pass to the Juno Bootstrap chart. See: https://github.com/juno-fx/Juno-Bootstrap If you do not use a direct OCI proxy and leverage the k3s_registries_yaml var, you also could need to adjust the repository from which to pull images. For details, see: https://github.com/juno-fx/Juno-Bootstrap and the example airgapped playbook. |
 | juno_bootstrap_git_password | {{ juno_git_password }} | This authenticates only the Juno-Bootstrap repository. You can leave it unchanged if both Juno-Bootstrap and Genesis-Deployment are accessible via juno_git_username&juno_git_password. |
@@ -158,7 +160,6 @@ You can check the detailed information for each file in the vars section above.
     juno_git_user: "oauth2"
     juno_git_password: "password"
     juno_genesis_deployment_git_url: "http://{{ proxy_address }}/git/Genesis-Deployment.git"
-    argo_install_manifest_url: "file://{{ playbook_dir }}/airgap_files/argo-install.yaml"
     juno_bootstrap_git_url: "http://{{ proxy_address }}/git/Juno-Bootstrap.git"
     k3s_install_script_url: "file://{{ playbook_dir }}/airgap_files/install.sh"
     k3s_binary_url: "file://{{ playbook_dir }}/airgap_files/k3s"
