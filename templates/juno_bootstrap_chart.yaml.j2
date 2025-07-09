@@ -17,8 +17,7 @@ spec:
     targetRevision: "{{ juno_bootstrap_chart_repo_revision }}"
     helm:
 {% if juno_bootstrap_chart_values %}
-      values: |
-        {{ juno_bootstrap_chart_values | to_yaml | indent(6) }}
+      values: '{{ juno_bootstrap_chart_values | tojson }}'
 {% endif %}
   syncPolicy:
     automated: {}
