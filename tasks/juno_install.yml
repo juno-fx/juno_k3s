@@ -72,6 +72,7 @@
 - name: Add credentials for Genesis-Deployment
   become: true
   when: juno_genesis_deployment_git_password
+  register: juno_genesis_deployment_git_password_result
   ansible.builtin.command:
     cmd: /usr/local/bin/k3s kubectl apply -f - --namespace argocd
   args:
@@ -88,7 +89,7 @@
         url: "{{ juno_genesis_deployment_git_url }}"
         password: "{{ juno_genesis_deployment_git_password }}"
         username: "{{ juno_genesis_deployment_git_username }}"
-  changed_when: "'created' in juno_genesis_deployment_git_password.stdout"
+  changed_when: "'created' in juno_genesis_deployment_git_password_result.stdout"
 
 - name: Template in the juno-bootstrap chart
   become: true
