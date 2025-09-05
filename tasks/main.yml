@@ -13,3 +13,4 @@
 - name: Bootstrap Juno
   when: juno_install and k3s_control_plane_node
   ansible.builtin.include_tasks: juno_install.yml
+  run_once: true

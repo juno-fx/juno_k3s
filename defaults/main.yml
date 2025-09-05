@@ -66,8 +66,9 @@ k3s_uninstall: false
 juno_install: true
 
 # @var juno_bootstrap_git_url:description: >
-#   The URL of the Juno-Bootstrap repository. This only needs to be adjusted if you forked it or are using an airgapped environment.
-juno_bootstrap_git_url: "https://github.com/juno-fx/Juno-Bootstrap.git"
+#   The URL of the Juno-Bootstrap git repository. This only needs to be adjusted if you forked it or are using an airgapped environment.
+#   This can be also be a local filepath to the chart directory on the machine where ansible runs on, starting with file://
+juno_bootstrap_url: "https://github.com/juno-fx/Juno-Bootstrap.git"
 # @var juno_bootstrap_chart_repo_revision:description: >
 #   The revision of the Juno-Bootstrap repository to use. This can be a branch name, tag or commit hash.
 juno_bootstrap_chart_repo_revision: "main"
@@ -93,9 +94,11 @@ juno_git_password: false
 
 # @var juno_bootstrap_git_username:description: >
 #   This authenticates only the Juno-Bootstrap repository. You can leave it unchanged if both Juno-Bootstrap and Genesis-Deployment are accessible via juno_git_username&juno_git_password.
+#   You only need to set this if you use a private fork of the Juno Bootstrap repository and are not passing it in via local checkout.
 juno_bootstrap_git_username: "{{ juno_git_username }}"
 # @var juno_bootstrap_git_password:description: >
 #  This authenticates only the Juno-Bootstrap repository. You can leave it unchanged if both Juno-Bootstrap and Genesis-Deployment are accessible via juno_git_username&juno_git_password.
+# You only need to set this if you use a private fork of the Juno Bootstrap repository and are not passing it in via local checkout
 juno_bootstrap_git_password: "{{ juno_git_password }}"
 
 # @var juno_genesis_deployment_git_username:description: >
