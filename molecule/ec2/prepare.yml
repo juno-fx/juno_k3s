@@ -3,9 +3,11 @@
   hosts: all
   gather_facts: false
   tasks:
-    - name: Make sure python3 is installed
+    - name: Make sure prereqs are present
       ansible.builtin.package:
-        name: python3
+        name:
+          - python3
+          - git
         state: present
       become: true
     - name: Gather service facts
