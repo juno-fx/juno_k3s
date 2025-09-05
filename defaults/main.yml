@@ -105,7 +105,7 @@ juno_bootstrap_git_password: "{{ juno_git_password }}"
 #   This authenticates only the Juno Genesis Deployment repository. You can leave it unchanged if both Juno-Bootstrap and Genesis-Deployment are accessible via juno_git_username&juno_git_password.
 juno_genesis_deployment_git_username: "{{ juno_git_username }}"
 # @var juno_genesis_deployment_git_password:description: >
-#   This authenticates only the Juno Genesis Deployment repository. You can leave it unchanged if
+#   This authenticates only the Juno Genesis Deployment repository. You can leave it unchanged if both Juno-Bootstrap and Genesis-Deployment are accessible via juno_git_username&juno_git_password.
 juno_genesis_deployment_git_password: "{{ juno_git_password }}"
 
 # @var k3s_perform_node_labeling:description: >
