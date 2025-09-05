@@ -49,26 +49,6 @@
   failed_when: argo_deploy_result.rc != 0 and "'AlreadyExists' not in argo_deploy_result.stderr"
   changed_when: "('created' in argo_deploy_result.stdout) and argo_deploy_result.rc == 0"
 
-- name: Add credentials for juno bootstrap via kubectl raw input
-  become: true
-  ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl apply -f - --namespace argocd
-  args:
-    stdin: |
-      apiVersion: v1
-      kind: Secret
-      metadata:
-        name: juno-bootstrap-repo-secret
-        namespace: argocd
-        labels:
-          argocd.argoproj.io/secret-type: repository
-      stringData:
-        type: git
-        url: "{{ juno_bootstrap_git_url }}"
-        password: "{{ juno_bootstrap_git_password }}"
-        username: "{{ juno_bootstrap_git_username }}"
-  when: juno_bootstrap_git_password
-
 - name: Add credentials for Genesis-Deployment
   become: true
   when: juno_genesis_deployment_git_password
@@ -91,19 +71,83 @@
         username: "{{ juno_genesis_deployment_git_username }}"
   changed_when: "'created' in juno_genesis_deployment_git_password_result.stdout"
 
-- name: Template in the juno-bootstrap chart
+- name: Ensure a secure dir in /tmp
+  become: true
+  ansible.builtin.file:
+    state: directory
+    path: /tmp/juno_bootstrap
+    mode: "0700"
+    owner: root
+    group: root
+
+- name: Construct the authenticated Juno-Bootstrap URL
+  when: juno_bootstrap_git_password
+  set_fact:
+    juno_bootstrap_url: "{{ juno_bootstrap_git_url | regex_replace('^https?://', 'https://{{ juno_bootstrap_git_username }}:{{ juno_bootstrap_git_password }}@') }}"
+
+- name: Clone the Juno Bootstrap repository
+  become: true
+  when: '"http" in juno_bootstrap_url'
+  ansible.builtin.git:
+    repo: "{{ juno_bootstrap_url }}"
+    dest: /tmp/juno_bootstrap
+    version: "{{ juno_bootstrap_chart_repo_revision }}"
+    force: true
+    accept_hostkey: true
+    clone: true
+    update: true
+
+- name: Copy in a local checkout of Juno-Bootstrap
+  become: true
+  when: '"http" not in juno_bootstrap_url'
+  ansible.builtin.copy:
+    src: "{{ juno_bootstrap_local_path }}"
+    dest: /tmp/juno_bootstrap
+    mode: "0750"
+    owner: root
+    group: root
+    remote_src: yes
+
+- name: Wait for the argo app controller to be available
+  become: true
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=argocd-application-controller -n argocd --timeout=600s
+  register: wait_for_argocd_result
+  failed_when: wait_for_argocd_result.rc != 0
+  changed_when: false
+
+- name: Obtain the name of the argocd app controller pod
+  become: true
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-application-controller -o jsonpath='{.items[0].metadata.name}'
+  register: argocd_app_controller_pod_name
+  changed_when: false
+
+- name: Ensure /tmp/juno_boostrap does not exist in the argocd-application-controller pod
+  become: true
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl exec -n argocd {{ argocd_app_controller_pod_name.stdout }} -- rm -rf /tmp/juno_bootstrap
+  changed_when: false
+
+- name: Template in the juno-bootstrap values
   become: true
   ansible.builtin.template:
     src: juno_bootstrap_chart.yaml.j2
-    dest: /root/juno_bootstrap_chart.yaml
+    dest: /tmp/juno_bootstrap/values.yml
     mode: "0600"
     owner: root
     group: root
 
-- name: Deploy the Juno Bootstrap chart
+- name: Copy in the chart into the argocd app controller pod
+  changed_when: false
   become: true
-  register: juno_bootstrap_chart_deploy_result
-  failed_when: juno_bootstrap_chart_deploy_result.rc != 0 and "'already exists' not in juno_bootstrap_chart_deploy_result.stderr"
-  changed_when: "('configured' in juno_bootstrap_chart_deploy_result.stdout or 'created' in juno_bootstrap_chart_deploy_result.stdout) and juno_bootstrap_chart_deploy_result.rc == 0"
   ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl apply -f /root/juno_bootstrap_chart.yaml --namespace argocd
+    cmd: /usr/local/bin/k3s kubectl cp /tmp/juno_bootstrap argocd/{{ argocd_app_controller_pod_name.stdout }}:/tmp/juno_bootstrap -n argocd
+  register: copy_juno_bootstrap_result
+  failed_when: copy_juno_bootstrap_result.rc != 0
+
+- name: Install/upgrade juno-bootstrap via argocd app controller
+  become: true
+  changed_when: false
+  ansible.builtin.command:
+    cmd: /usr/local/bin/k3s kubectl exec -n argocd {{ argocd_app_controller_pod_name.stdout }} -- helm upgrade --install juno-bootstrap /tmp/juno_bootstrap/chart --values /tmp/juno_bootstrap/values.yml
