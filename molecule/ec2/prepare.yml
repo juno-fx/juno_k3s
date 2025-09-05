@@ -5,6 +5,7 @@
   tasks:
     - name: Make sure prereqs are present
       ansible.builtin.package:
+        update_cache: true
         name:
           - python3
           - git
