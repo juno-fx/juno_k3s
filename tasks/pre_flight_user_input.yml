@@ -12,6 +12,14 @@
       - "'http://' in k3s_install_script_url or 'https://' in k3s_install_script_url or 'file://' in k3s_install_script_url"
     fail_msg: "k3s_install_script_url must be a valid URL or file path, preceded by http://, https:// or file://"
 
+- name: Validate the Juno Bootstrap URL
+  ansible.builtin.assert:
+    that:
+      - juno_bootstrap_git_url is not none
+      - juno_bootstrap_git_url | length > 0
+      - "'http://' in juno_bootstrap_git_url or 'https://' in juno_bootstrap_git_url or 'file://' in juno_bootstrap_git_url"
+    fail_msg: "juno_bootstrap_git_url must be a valid URL or file path, preceded by http://, https:// or file://"
+
 - name: Validate the k3s binary URL
   ansible.builtin.assert:
     that:

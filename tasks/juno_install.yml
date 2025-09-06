@@ -99,9 +99,9 @@
 
 - name: Copy in a local checkout of Juno-Bootstrap
   become: true
-  when: '"http" not in juno_bootstrap_url'
+  when: '"file://" in juno_bootstrap_url'
   ansible.builtin.copy:
-    src: "{{ juno_bootstrap_local_path }}"
+    src: "{{ juno_bootstrap_url | regex_replace('^file://', '') }}"
     dest: /tmp/juno_bootstrap
     mode: "0750"
     owner: root
