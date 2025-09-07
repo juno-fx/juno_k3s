@@ -83,7 +83,7 @@
 - name: Construct the authenticated Juno-Bootstrap URL
   when: juno_bootstrap_git_password
   set_fact:
-    juno_bootstrap_url: "{{ juno_bootstrap_git_url | regex_replace('^https?://', 'https://{{ juno_bootstrap_git_username }}:{{ juno_bootstrap_git_password }}@') }}"
+    juno_bootstrap_url: "{{ juno_bootstrap_url | regex_replace('^https?://', 'https://{{ juno_bootstrap_git_username }}:{{ juno_bootstrap_git_password }}@') }}"
 
 - name: Clone the Juno Bootstrap repository
   become: true
