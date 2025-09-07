@@ -101,12 +101,11 @@
   become: true
   when: '"file://" in juno_bootstrap_url'
   ansible.builtin.copy:
-    src: "{{ juno_bootstrap_url | regex_replace('^file://', '') }}"
+    src: "{{ juno_bootstrap_url | regex_replace('^file://', '') }}/"
     dest: /tmp/juno_bootstrap
     mode: "0750"
     owner: root
     group: root
-    remote_src: yes
 
 - name: Wait for the argo app controller to be available
   become: true
