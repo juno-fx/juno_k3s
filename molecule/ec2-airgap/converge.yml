@@ -19,7 +19,7 @@
     juno_git_user: "oauth2"
     juno_git_password: "password"
     juno_genesis_deployment_git_url: "http://{{ proxy_address }}/git/Genesis-Deployment.git"
-    juno_bootstrap_git_url: "http://{{ proxy_address }}/git/Juno-Bootstrap.git"
+    juno_bootstrap_url: "http://{{ proxy_address }}/git/Juno-Bootstrap.git"
     k3s_install_script_url: "file://{{ playbook_dir }}/airgap_files/install.sh"
     k3s_binary_url: "file://{{ playbook_dir }}/airgap_files/k3s"
     # For more details on using a private registry, eg. using authentication, see:

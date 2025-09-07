@@ -15,10 +15,10 @@
 - name: Validate the Juno Bootstrap URL
   ansible.builtin.assert:
     that:
-      - juno_bootstrap_git_url is not none
-      - juno_bootstrap_git_url | length > 0
-      - "'http://' in juno_bootstrap_git_url or 'https://' in juno_bootstrap_git_url or 'file://' in juno_bootstrap_git_url"
-    fail_msg: "juno_bootstrap_git_url must be a valid URL or file path, preceded by http://, https:// or file://"
+      - juno_bootstrap_url is not none
+      - juno_bootstrap_url | length > 0
+      - "'http://' in juno_bootstrap_url or 'https://' in juno_bootstrap_url or 'file://' in juno_bootstrap_url"
+    fail_msg: "juno_bootstrap_url must be a valid URL or file path, preceded by http://, https:// or file://"
 
 - name: Validate the k3s binary URL
   ansible.builtin.assert:

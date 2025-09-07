@@ -65,7 +65,7 @@ k3s_uninstall: false
 #   Bootstrap Juno's Orion using https://github.com/juno-fx/Juno-Bootstrap
 juno_install: true
 
-# @var juno_bootstrap_git_url:description: >
+# @var juno_bootstrap_url:description: >
 #   The URL of the Juno-Bootstrap git repository. This only needs to be adjusted if you forked it or are using an airgapped environment.
 #   This can be also be a local filepath to the chart directory on the machine where ansible runs on, starting with file://
 juno_bootstrap_url: "https://github.com/juno-fx/Juno-Bootstrap.git"

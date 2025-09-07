@@ -24,7 +24,7 @@ Supporting both airgapped and online environments
 | juno_bootstrap_chart_repo_revision | main |  The revision of the Juno-Bootstrap repository to use. This can be a branch name, tag or commit hash. |
 | juno_bootstrap_chart_values | {} |  Values to pass to the Juno Bootstrap chart. See: https://github.com/juno-fx/Juno-Bootstrap If you do not use a direct OCI proxy and leverage the k3s_registries_yaml var, you also could need to adjust the repository from which to pull images. For details, see: https://github.com/juno-fx/Juno-Bootstrap and the example airgapped playbook. |
 | juno_bootstrap_git_password | {{ juno_git_password }} | This authenticates only the Juno-Bootstrap repository. You can leave it unchanged if both Juno-Bootstrap and Genesis-Deployment are accessible via juno_git_username&juno_git_password.You only need to set this if you use a private fork of the Juno Bootstrap repository and are not passing it in via local checkout |
-| juno_bootstrap_git_url |  |  The URL of the Juno-Bootstrap git repository. This only needs to be adjusted if you forked it or are using an airgapped environment.  This can be also be a local filepath to the chart directory on the machine where ansible runs on, starting with file:// |
+| juno_bootstrap_url |  |  The URL of the Juno-Bootstrap git repository. This only needs to be adjusted if you forked it or are using an airgapped environment.  This can be also be a local filepath to the chart directory on the machine where ansible runs on, starting with file:// |
 | juno_bootstrap_git_username | {{ juno_git_username }} |  This authenticates only the Juno-Bootstrap repository. You can leave it unchanged if both Juno-Bootstrap and Genesis-Deployment are accessible via juno_git_username&juno_git_password.  You only need to set this if you use a private fork of the Juno Bootstrap repository and are not passing it in via local checkout. |
 | juno_bootstrap_url | https://github.com/juno-fx/Juno-Bootstrap.git | |
 | juno_genesis_deployment_git_password | {{ juno_git_password }} |  This authenticates only the Juno Genesis Deployment repository. You can leave it unchanged if both Juno-Bootstrap and Genesis-Deployment are accessible via juno_git_username&juno_git_password. |
@@ -161,7 +161,7 @@ You can check the detailed information for each file in the vars section above.
     juno_git_user: "oauth2"
     juno_git_password: "password"
     juno_genesis_deployment_git_url: "http://{{ proxy_address }}/git/Genesis-Deployment.git"
-    juno_bootstrap_git_url: "http://{{ proxy_address }}/git/Juno-Bootstrap.git"
+    juno_bootstrap_url: "http://{{ proxy_address }}/git/Juno-Bootstrap.git"
     k3s_install_script_url: "file://{{ playbook_dir }}/airgap_files/install.sh"
     k3s_binary_url: "file://{{ playbook_dir }}/airgap_files/k3s"
     # For more details on using a private registry, eg. using authentication, see:
