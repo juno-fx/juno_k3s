@@ -149,4 +149,4 @@
   become: true
   changed_when: false
   ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl exec -n argocd {{ argocd_app_controller_pod_name.stdout }} -- helm upgrade --install juno-bootstrap /tmp/juno_bootstrap/chart --values /tmp/juno_bootstrap/values.yml
+    cmd: /usr/local/bin/k3s kubectl exec -n argocd {{ argocd_app_controller_pod_name.stdout }} -- helm upgrade --install juno-bootstrap /tmp/juno_bootstrap/chart --values /tmp/juno_bootstrap/values.yml --set gpu.config.toolkit.env[0].name=CONTAINERD_CONFIG --set gpu.config.toolkit.env[0].value=/var/lib/rancher/k3s/agent/etc/containerd/config.toml --set gpu.config.toolkit.env[1].name=CONTAINERD_SOCKET --set gpu.config.toolkit.env[1].value=/run/k3s/containerd/containerd.sock
