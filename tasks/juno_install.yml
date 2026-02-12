@@ -51,7 +51,7 @@
 
 - name: Add credentials for Genesis-Deployment
   become: true
-  when: juno_genesis_deployment_git_password
+  when: juno_genesis_deployment_git_password | bool
   register: juno_genesis_deployment_git_password_result
   ansible.builtin.command:
     cmd: /usr/local/bin/k3s kubectl apply -f - --namespace argocd
@@ -81,7 +81,7 @@
     group: root
 
 - name: Construct the authenticated Juno-Bootstrap URL
-  when: juno_bootstrap_git_password
+  when: juno_bootstrap_git_password | bool
   set_fact:
     juno_bootstrap_url: "{{ juno_bootstrap_url | regex_replace('^https?://', 'https://{{ juno_bootstrap_git_username }}:{{ juno_bootstrap_git_password }}@') }}"
 

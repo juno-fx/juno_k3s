@@ -75,7 +75,7 @@ juno_bootstrap_chart_repo_revision: "main"
 
 # @var juno_genesis_deployment_git_url:description: >
 #   The URL of the Genesis-Deployment repository. Note you still need to set the juno_bootstrap_chart_values.genesis.url value to point to the Genesis-Deployment repository.
-#   This argument is only used to create the git sercet. It can be left empty on a default, non-airgapped install.
+#   This argument is only used to create the git secret. It can be left empty on a default, non-airgapped install.
 juno_genesis_deployment_git_url: "https://github.com/juno-fx/Genesis-Deployment.git"
 
 # @var juno_bootstrap_chart_values:description: >

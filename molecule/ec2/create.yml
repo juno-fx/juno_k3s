@@ -158,8 +158,9 @@
     - name: Validate discovered information
       ansible.builtin.assert:
         that:
-          - platform.image or (ami_info.results[index].images | length > 0)
-          - platform.vpc_id or (subnet_info.results[index].subnets | length > 0)
+          # Check if the string length is greater than 0 explicitly
+          - (platform.image | length > 0) or (ami_info.results[index]['images'] | default([]) | length > 0)
+          - (platform.vpc_id | length > 0) or (subnet_info.results[index]['subnets'] | default([]) | length > 0)
         quiet: true
       loop: "{{ platforms }}"
       loop_control:
