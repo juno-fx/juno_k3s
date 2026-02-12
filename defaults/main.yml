@@ -82,7 +82,11 @@ juno_genesis_deployment_git_url: "https://github.com/juno-fx/Genesis-Deployment.
 #   Values to pass to the Juno Bootstrap chart. See: https://github.com/juno-fx/Juno-Bootstrap
 #  If you do not use a direct OCI proxy and leverage the k3s_registries_yaml var, you also could need to adjust the repository from which to pull images.
 #  For details, see: https://github.com/juno-fx/Juno-Bootstrap and the example airgapped playbook.
-juno_bootstrap_chart_values: {}
+juno_bootstrap_chart_values:
+  genesis:
+    url: "{{juno_genesis_deployment_git_url}}"
+  ingress:
+    url: "https://kubernetes.github.io/ingress-nginx"
 
 # @var juno_git_username:description: >
 #   The username used to authenticate with all Juno repositories you specified. This is needed when you use a private fork of the Juno Bootstrap repository.
