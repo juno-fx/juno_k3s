@@ -11,7 +11,7 @@
   ansible.builtin.assert:
     that:
       # todo: evaluate alma9, do a quick sanity check. Should be identical to Rocky and require no further changes
-      - ansible_distribution in ['Ubuntu', 'Debian','RedHat', "Rocky"]
+      - ansible_distribution in ['Ubuntu', 'Debian','RedHat', "Rocky", "Alma"]
     fail_msg: "This Ansible role is only supported on Ubuntu, Debian, or RedHat distributions."
 
 - name: Attempt to load the wireguard kernel module
