@@ -4,7 +4,7 @@ debian12_AMI = ami-02da2f5b47450f5a8
 debian13_AMI = ami-050352a65e954abb1
 ubuntu24_AMI = ami-0d1b5a8c13042c939
 rocky95_AMI = ami-05150ea4d8a533099
-rocky10_AMI = ami-00c659dce896f9980
+rocky101_AMI = ami-00c659dce896f9980
 alma101_AMI = ami-070f0d38c534f0fd8
 
 export AWS_VPC_SUBNET_ID ?= subnet-090d8a0ac7e70b207
@@ -65,32 +65,32 @@ converge-airgap-debian12: converge-airgap-debian12
 converge-airgap-debian13: converge-airgap-debian13
 converge-airgap-ubuntu24: converge-airgap-ubuntu24
 converge-airgap-rocky95: converge-airgap-rocky95
-converge-airgap-rocky10: converge-airgap-rocky10
+converge-airgap-rocky101: converge-airgap-rocky101
 test-airgap-debian12: test-airgap-debian12
 test-airgap-debian13: test-airgap-debian13
 test-airgap-ubuntu24: test-airgap-ubuntu24
 test-airgap-rocky95: test-airgap-rocky95
-test-airgap-rocky10: test-airgap-rocky10
+test-airgap-rocky101: test-airgap-rocky101
 destroy-airgap-debian12: destroy-airgap-debian12
 destroy-airgap-debian13: destroy-airgap-debian13
 destroy-airgap-ubuntu24: destroy-airgap-ubuntu24
 destroy-airgap-rocky95: destroy-airgap-rocky95
-destroy-airgap-rocky10: destroy-airgap-rocky10
+destroy-airgap-rocky101: destroy-airgap-rocky101
 converge-debian12: converge-debian12
 converge-debian13: converge-debian13
 converge-ubuntu24: converge-ubuntu24
 converge-rocky95: converge-rocky95
-converge-rocky10: converge-rocky10
+converge-rocky101: converge-rocky101
 test-debian12: test-debian12
 test-debian13: test-debian13
 test-ubuntu24: test-ubuntu24
 test-rocky95: test-rocky95
-test-rocky10: test-rocky10
+test-rocky101: test-rocky101
 destroy-debian12: destroy-debian12
 destroy-debian13: destroy-debian13
 destroy-ubuntu24: destroy-ubuntu24
 destroy-rocky95: destroy-rocky95
-destroy-rocky10: destroy-rocky10
+destroy-rocky101: destroy-rocky101
 login-control_plane01: login-control_plane01
 login-control_plane02: login-control_plane02
 login-control_plane03: login-control_plane03
