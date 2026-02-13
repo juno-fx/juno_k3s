@@ -8,6 +8,7 @@
   vars:
     supported_major_versions:
       - "9"
+      - "10 "
 - name: Assert firewalld is not running
   ansible.builtin.assert:
     that:
