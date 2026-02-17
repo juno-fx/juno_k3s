@@ -1,1 +1,46 @@
-pre_flight_redhat.yml
+---
+- name: Assert we are on a supported major version of RedHat
+  when: validate_os_version
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution_major_version | string in supported_major_versions
+    fail_msg: "This Ansible role is only supported on {{ supported_major_versions | join(', ') }} RedHat versions."
+  vars:
+    supported_major_versions:
+      - "10"
+- name: Assert firewalld is not running
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.services['firewalld']['state'] != 'running'
+    fail_msg: "Firewalld must not be running on RedHat-based systems (it can be stopped or masked). See: https://docs.rke2.io/known_issues#firewalld-conflicts-with-default-networking"
+  when: "'firewalld' in ansible_facts.services"
+
+- name: Assert SELinux is permissive or disabled
+  when: "'selinux' in ansible_facts.services"
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.selinux.status in ['permissive', 'disabled']
+    fail_msg: "SELinux must be permissive or disabled on RedHat-based systems. If this is an important feature for you, please raise a feature request for it."
+
+- name: Install Extra Kernel Modules
+  ansible.builtin.package:
+    update_cache: true
+    name:
+      - kernel-modules-extra-{{ ansible_kernel }}
+    state: present
+  become: true
+  register: kernel_mods
+  when: ansible_distribution_major_version|int == 10
+
+- name: Reload depmods
+  ansible.builtin.command:
+    cmd: depmod -a
+  when: kernel_mods | bool
+  become: true
+
+- name: Load in the required modules for k3s to work on the fly
+  ansible.builtin.command:
+    cmd: modprobe -a nf_conntrack xt_conntrack nf_conntrack_netlink
+  when: kernel_mods | bool
+  become: true
+

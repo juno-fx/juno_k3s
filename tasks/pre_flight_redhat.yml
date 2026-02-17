@@ -40,7 +40,7 @@
   when: kernel_mods | bool
   become: true
 
-- name: Reload depmods
+- name: Load in the required modules for k3s to work on the fly
   ansible.builtin.command:
     cmd: modprobe -a nf_conntrack xt_conntrack nf_conntrack_netlink
   when: kernel_mods | bool
