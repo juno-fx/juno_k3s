@@ -39,7 +39,7 @@ login-airgap-proxy: venv/bin/activate
 	. venv/bin/activate; venv/bin/molecule login -s ec2-airgap --host airgap_proxy
 
 converge-airgap-%: venv/bin/activate
-	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} venv/bin/molecule converge -s ec2-airgap
+	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} DISTRO=$* venv/bin/molecule converge -s ec2-airgap
 
 prepare-airgap-%: venv/bin/activate
 	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} venv/bin/molecule prepare -f -s ec2-airgap
@@ -51,7 +51,7 @@ destroy-airgap-%: venv/bin/activate
 	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} venv/bin/molecule destroy -s ec2-airgap
 
 converge-%: venv/bin/activate
-	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} venv/bin/molecule converge -s ec2
+	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} DISTRO=$* venv/bin/molecule converge -s ec2
 
 test-%: venv/bin/activate
 	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} venv/bin/molecule test -s ec2
