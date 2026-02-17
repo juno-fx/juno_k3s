@@ -27,6 +27,7 @@
     update_cache: true
     name:
       - kernel-modules-extra-{{ ansible_kernel }}
+      - kernel-modules-extra
     state: present
   become: true
   register: kernel_mods

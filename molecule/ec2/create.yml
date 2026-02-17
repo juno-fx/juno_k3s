@@ -67,7 +67,11 @@
       region: ""
       security_groups: []
       tags: {}
-      volumes: []
+      volumes:
+        - device_name: /dev/sda1
+          ebs:
+            volume_size: 8
+            delete_on_termination: true
       vpc_id: ""
       vpc_subnet_id: ""
 
