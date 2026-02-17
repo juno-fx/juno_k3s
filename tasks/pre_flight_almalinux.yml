@@ -6,8 +6,8 @@
       - ansible_distribution_major_version | string in supported_major_versions
     fail_msg: "This Ansible role is only supported on {{ supported_major_versions | join(', ') }} RedHat versions."
   vars:
-    supported_major_versions:
-      - "10"
+    supported_major_versions: "{{ juno_supported_alma }}"
+
 - name: Assert firewalld is not running
   ansible.builtin.assert:
     that:

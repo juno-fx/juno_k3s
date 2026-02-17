@@ -153,3 +153,17 @@ argocd_image_pull_secret: false
 # @var argocd_image_pull_secret_name:description: >
 #   The name of the image pull secret to use for ArgoCD.
 argocd_image_pull_secret_name: "argo-image-pull-secret"
+
+# @var juno_supported_debian:description: The major versions of Debian Juno supported running on
+juno_supported_debian:
+  - "12"
+  - "13"
+
+# @var juno_supported_rhel:description: The major versions of Redhat (and Rocky) Juno supported running on
+juno_supported_rhel:
+  - "9"
+  - "10"
+
+# @var juno_supported_alma:description: The major versions of AlmaLinux Juno supported running on
+juno_supported_alma:
+  - "10"
