@@ -6,10 +6,6 @@
 - name: Validate user input
   ansible.builtin.include_tasks: pre_flight_user_input.yml
 
-- name: debug
-  ansible.builtin.debug:
-    msg: lol {{ ansible_distribution }}
-
 - name: Check if we are on one of supported platforms
   when: validate_os_version
   ansible.builtin.assert:

@@ -44,6 +44,7 @@
         to_port: 0
         cidr_ip: "0.0.0.0/0"
 
+    # The AMI for alma has a very small disk, so specify the size here, this disk is only applied to alma
     platform_os: "{{ lookup('env', 'DISTRO') }}"
     platform_vol_size:
       - device_name: /dev/sda1
