@@ -75,14 +75,18 @@ juno_bootstrap_chart_repo_revision: "main"
 
 # @var juno_genesis_deployment_git_url:description: >
 #   The URL of the Genesis-Deployment repository. Note you still need to set the juno_bootstrap_chart_values.genesis.url value to point to the Genesis-Deployment repository.
-#   This argument is only used to create the git sercet. It can be left empty on a default, non-airgapped install.
+#   This argument is only used to create the git secret. It can be left empty on a default, non-airgapped install.
 juno_genesis_deployment_git_url: "https://github.com/juno-fx/Genesis-Deployment.git"
 
 # @var juno_bootstrap_chart_values:description: >
 #   Values to pass to the Juno Bootstrap chart. See: https://github.com/juno-fx/Juno-Bootstrap
 #  If you do not use a direct OCI proxy and leverage the k3s_registries_yaml var, you also could need to adjust the repository from which to pull images.
 #  For details, see: https://github.com/juno-fx/Juno-Bootstrap and the example airgapped playbook.
-juno_bootstrap_chart_values: {}
+juno_bootstrap_chart_values:
+  genesis:
+    url: "{{juno_genesis_deployment_git_url}}"
+  ingress:
+    url: "https://kubernetes.github.io/ingress-nginx"
 
 # @var juno_git_username:description: >
 #   The username used to authenticate with all Juno repositories you specified. This is needed when you use a private fork of the Juno Bootstrap repository.
@@ -149,3 +153,17 @@ argocd_image_pull_secret: false
 # @var argocd_image_pull_secret_name:description: >
 #   The name of the image pull secret to use for ArgoCD.
 argocd_image_pull_secret_name: "argo-image-pull-secret"
+
+# @var juno_supported_debian:description: The major versions of Debian Juno supported running on
+juno_supported_debian:
+  - "12"
+  - "13"
+
+# @var juno_supported_rhel:description: The major versions of Redhat (and Rocky) Juno supported running on
+juno_supported_rhel:
+  - "9"
+  - "10"
+
+# @var juno_supported_alma:description: The major versions of AlmaLinux Juno supported running on
+juno_supported_alma:
+  - "10"

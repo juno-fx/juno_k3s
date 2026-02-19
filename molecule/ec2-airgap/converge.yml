@@ -19,6 +19,7 @@
     juno_git_user: "oauth2"
     juno_git_password: "password"
     juno_genesis_deployment_git_url: "http://{{ proxy_address }}/git/Genesis-Deployment.git"
+    nginx_ingress_deployment_git_url: "http://{{ proxy_address }}/git/ingress-nginx.git"
     juno_bootstrap_url: "http://{{ proxy_address }}/git/Juno-Bootstrap.git"
     k3s_install_script_url: "file://{{ playbook_dir }}/airgap_files/install.sh"
     k3s_binary_url: "file://{{ playbook_dir }}/airgap_files/k3s"
@@ -38,7 +39,9 @@
     k3s_airgap_install: true
     juno_bootstrap_chart_values:
       genesis:
-        repoURL: "http://{{ proxy_address }}/git/Genesis-Deployment.git"
+        url: "{{ juno_genesis_deployment_git_url }}"
+      ingress:
+        url: "{{ nginx_ingress_deployment_git_url }}"
   tasks:
     - name: Check if the join token file exists
       ansible.builtin.stat:

@@ -1,8 +1,6 @@
 # juno_k3s
 
-A role deploying k3s&bootstrapping [Juno Innovations Orion](https://www.juno-innovations.com/)
-Supporting both airgapped and online environments
-
+<generator object sync_do_map at 0x7fa8d9272c40>
 
 ## Table of content
 
@@ -22,17 +20,19 @@ Supporting both airgapped and online environments
 | argocd_image_pull_secret_name | argo-image-pull-secret |  The name of the image pull secret to use for ArgoCD. |
 | argocd_image_substitutions | {'quay.io/argoproj/argocd': {'newName': 'quay.io/argoproj/argocd', 'newTag': 'v3.0.9'}, 'ghcr.io/dexidp/dex': {'newName': 'ghcr.io/dexidp/dex', 'newTag': 'v2.41.1'}, 'docker.io/library/redis': {'newName': 'docker.io/library/redis', 'newTag': '7.2.7-alpine'}} | |
 | juno_bootstrap_chart_repo_revision | main |  The revision of the Juno-Bootstrap repository to use. This can be a branch name, tag or commit hash. |
-| juno_bootstrap_chart_values | {} |  Values to pass to the Juno Bootstrap chart. See: https://github.com/juno-fx/Juno-Bootstrap If you do not use a direct OCI proxy and leverage the k3s_registries_yaml var, you also could need to adjust the repository from which to pull images. For details, see: https://github.com/juno-fx/Juno-Bootstrap and the example airgapped playbook. |
+| juno_bootstrap_chart_values | {'genesis': {'url': '{{juno_genesis_deployment_git_url}}'}, 'ingress': {'url': 'https://kubernetes.github.io/ingress-nginx'}} |  Values to pass to the Juno Bootstrap chart. See: https://github.com/juno-fx/Juno-Bootstrap If you do not use a direct OCI proxy and leverage the k3s_registries_yaml var, you also could need to adjust the repository from which to pull images. For details, see: https://github.com/juno-fx/Juno-Bootstrap and the example airgapped playbook. |
 | juno_bootstrap_git_password | {{ juno_git_password }} | This authenticates only the Juno-Bootstrap repository. You can leave it unchanged if both Juno-Bootstrap and Genesis-Deployment are accessible via juno_git_username&juno_git_password.You only need to set this if you use a private fork of the Juno Bootstrap repository and are not passing it in via local checkout |
-| juno_bootstrap_url |  |  The URL of the Juno-Bootstrap git repository. This only needs to be adjusted if you forked it or are using an airgapped environment.  This can be also be a local filepath to the chart directory on the machine where ansible runs on, starting with file:// |
 | juno_bootstrap_git_username | {{ juno_git_username }} |  This authenticates only the Juno-Bootstrap repository. You can leave it unchanged if both Juno-Bootstrap and Genesis-Deployment are accessible via juno_git_username&juno_git_password.  You only need to set this if you use a private fork of the Juno Bootstrap repository and are not passing it in via local checkout. |
-| juno_bootstrap_url | https://github.com/juno-fx/Juno-Bootstrap.git | |
+| juno_bootstrap_url | https://github.com/juno-fx/Juno-Bootstrap.git |  The URL of the Juno-Bootstrap git repository. This only needs to be adjusted if you forked it or are using an airgapped environment.  This can be also be a local filepath to the chart directory on the machine where ansible runs on, starting with file:// |
 | juno_genesis_deployment_git_password | {{ juno_git_password }} |  This authenticates only the Juno Genesis Deployment repository. You can leave it unchanged if both Juno-Bootstrap and Genesis-Deployment are accessible via juno_git_username&juno_git_password. |
-| juno_genesis_deployment_git_url | https://github.com/juno-fx/Genesis-Deployment.git |  The URL of the Genesis-Deployment repository. Note you still need to set the juno_bootstrap_chart_values.genesis.url value to point to the Genesis-Deployment repository.  This argument is only used to create the git sercet. It can be left empty on a default, non-airgapped install. |
+| juno_genesis_deployment_git_url | https://github.com/juno-fx/Genesis-Deployment.git |  The URL of the Genesis-Deployment repository. Note you still need to set the juno_bootstrap_chart_values.genesis.url value to point to the Genesis-Deployment repository.  This argument is only used to create the git secret. It can be left empty on a default, non-airgapped install. |
 | juno_genesis_deployment_git_username | {{ juno_git_username }} |  This authenticates only the Juno Genesis Deployment repository. You can leave it unchanged if both Juno-Bootstrap and Genesis-Deployment are accessible via juno_git_username&juno_git_password. |
 | juno_git_password | False |  The password used to authenticate with all Juno repositories you specified. If left to the default (false), a public repository is assumed. |
 | juno_git_username | oauth2 |  The username used to authenticate with all Juno repositories you specified. This is needed when you use a private fork of the Juno Bootstrap repository.  It is particularly useful in airgapped environments, where you might neither have access to the public version and might require authentication on your Git host. |
 | juno_install | True |  Bootstrap Juno's Orion using https://github.com/juno-fx/Juno-Bootstrap |
+| juno_supported_alma | ['10'] |The major versions of AlmaLinux Juno supported running on |
+| juno_supported_debian | ['12', '13'] |The major versions of Debian Juno supported running on |
+| juno_supported_rhel | ['9', '10'] |The major versions of Redhat Juno supported running on |
 | k3s_airgap_install | False |  If true, the playbook will perform an airgapped install. Make sure all the URLs above are set to file:// or point to a local mirror.  When setting the URLs to file://, they will be copied from your Ansible control host to the remote hosts. |
 | k3s_binary_url | https://github.com/k3s-io/k3s/releases/download/v1.33.1%2Bk3s1/k3s |  URL for the k3s binary. Can be http://, https:// OR file://  When using file://, a path from your ansible control host (where your run the playbook from) will be used.  The files will be copied to the remote kubernetes hosts. This is useful for airgap installs. |
 | k3s_bootstrap_node | False |  The node used to bootstrap the cluster. This should only ever be a single node in your inventory!  The playbook example we provide discovers this dynamically, but you can also set it manually. |
@@ -161,6 +161,7 @@ You can check the detailed information for each file in the vars section above.
     juno_git_user: "oauth2"
     juno_git_password: "password"
     juno_genesis_deployment_git_url: "http://{{ proxy_address }}/git/Genesis-Deployment.git"
+    nginx_ingress_deployment_git_url: "http://{{ proxy_address }}/git/ingress-nginx.git"
     juno_bootstrap_url: "http://{{ proxy_address }}/git/Juno-Bootstrap.git"
     k3s_install_script_url: "file://{{ playbook_dir }}/airgap_files/install.sh"
     k3s_binary_url: "file://{{ playbook_dir }}/airgap_files/k3s"
@@ -180,7 +181,9 @@ You can check the detailed information for each file in the vars section above.
     k3s_airgap_install: true
     juno_bootstrap_chart_values:
       genesis:
-        repoURL: "http://{{ proxy_address }}/git/Genesis-Deployment.git"
+        url: "{{ juno_genesis_deployment_git_url }}"
+      ingress:
+        url: "{{ nginx_ingress_deployment_git_url }}"
   tasks:
     - name: Check if the join token file exists
       ansible.builtin.stat:

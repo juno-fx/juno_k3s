@@ -6,5 +6,4 @@
       - ansible_distribution_major_version | string in supported_major_versions
     fail_msg: "This Ansible role is only supported on {{ supported_major_versions | join(', ') }} Debian versions."
   vars:
-    supported_major_versions:
-      - "12"
+    supported_major_versions: "{{ juno_supported_debian }}"

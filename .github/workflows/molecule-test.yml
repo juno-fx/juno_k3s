@@ -8,7 +8,7 @@ jobs:
     strategy:
       max-parallel: 1 # this can be faster, working on it :)
       matrix:
-        os-target: [ubuntu24, debian12, rocky95]
+        os-target: [ubuntu24, debian12, debian13, rocky95, rocky101, alma101]
     steps:
       - name: Checkout the code
         uses: actions/checkout@v4
@@ -16,5 +16,6 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
           AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          DISTRO: ${{ matrix.os-target }}
         run: |
           make test-${{ matrix.os-target }}

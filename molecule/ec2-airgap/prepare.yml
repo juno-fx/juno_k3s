@@ -54,6 +54,16 @@
         update: true
         accept_hostkey: true
 
+    - name: Clone down the Nginx Ingress repo to /srv/git/ingress-nginx
+      become: true
+      ansible.builtin.git:
+        repo: https://github.com/kubernetes/ingress-nginx.git
+        dest: /srv/git/ingress-nginx.git
+        version: "3.15.2"
+        force: true
+        update: true
+        accept_hostkey: true
+
     - name: Set ownership on /srv/git recursively to www-data
       become: true
       ansible.builtin.file:
