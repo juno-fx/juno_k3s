@@ -1,6 +1,8 @@
 on:
   push:
-
+    paths-ignore:
+      - "README.md"
+      - "docs/**"
 jobs:
   molecule-test:
     runs-on:
