@@ -3,6 +3,8 @@ on:
     paths-ignore:
       - "README.md"
       - "docs/**"
+  workflow_dispatch:
+  workflow_call:
 jobs:
   molecule-test:
     runs-on:
