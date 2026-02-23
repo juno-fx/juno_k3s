@@ -1,6 +1,7 @@
 on:
   push:
     paths-ignore:
+      - '.github/**'
       - "README.md"
       - "docs/**"
   workflow_dispatch:
