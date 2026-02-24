@@ -1,6 +1,6 @@
 # juno_k3s
 
-<generator object sync_do_map at 0x7fa8d9272c40>
+<generator object sync_do_map at 0x7f9f37b26d40>
 
 ## Table of content
 
@@ -8,8 +8,10 @@
 - [Example playbook - online/internet-enabled installation](#example-playbook---onlineinternet-enabled-installation)
 - [Example playbook - airgapped installation](#example-playbook---airgapped-installation)
 - [Dependencies](#dependencies)
+- [Supported Operating Systems](#supported-operating-systems)
 - [License](#license)
 - [Author](#author)
+
 
 ---
 
@@ -32,7 +34,7 @@
 | juno_install | True |  Bootstrap Juno's Orion using https://github.com/juno-fx/Juno-Bootstrap |
 | juno_supported_alma | ['10'] |The major versions of AlmaLinux Juno supported running on |
 | juno_supported_debian | ['12', '13'] |The major versions of Debian Juno supported running on |
-| juno_supported_rhel | ['9', '10'] |The major versions of Redhat Juno supported running on |
+| juno_supported_rhel | ['9', '10'] |The major versions of Redhat (and Rocky) Juno supported running on |
 | k3s_airgap_install | False |  If true, the playbook will perform an airgapped install. Make sure all the URLs above are set to file:// or point to a local mirror.  When setting the URLs to file://, they will be copied from your Ansible control host to the remote hosts. |
 | k3s_binary_url | https://github.com/k3s-io/k3s/releases/download/v1.33.1%2Bk3s1/k3s |  URL for the k3s binary. Can be http://, https:// OR file://  When using file://, a path from your ansible control host (where your run the playbook from) will be used.  The files will be copied to the remote kubernetes hosts. This is useful for airgap installs. |
 | k3s_bootstrap_node | False |  The node used to bootstrap the cluster. This should only ever be a single node in your inventory!  The playbook example we provide discovers this dynamically, but you can also set it manually. |
@@ -287,3 +289,16 @@ Juno Innovations
 This repository comes in with a Makefile providing targets for testing & linting the role.
 
 For usage examples see: [CONTRIBUTING.md](CONTRIBUTING.md)
+
+# Supported Operating Systems
+
+The following major versions of the specified Linux distributions are supported by Juno
+
+## Debian
+- 12
+- 13
+## Redhat and Rocky
+- 9
+- 10
+## AlmaLinux
+- 10

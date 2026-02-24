@@ -48,3 +48,22 @@ You can check the detailed information for each file in the vars section above.
 This repository comes in with a Makefile providing targets for testing & linting the role.
 
 For usage examples see: [CONTRIBUTING.md](CONTRIBUTING.md)
+
+# Supported Operating Systems
+
+The following major versions of the specified Linux distributions are supported by Juno
+
+{% for key, value in role.var.items() %}
+  {% if key == 'juno_supported_debian' %}
+## Debian
+  {% for os in value.value.juno_supported_debian %}- {{ os + "\n"}}{% endfor %}
+  {% endif %}
+  {% if key == 'juno_supported_rhel' %}
+## Redhat and Rocky
+    {% for os in value.value.juno_supported_rhel %}- {{ os + "\n"}}{% endfor %}
+{% endif %}
+  {% if key == 'juno_supported_alma' %}
+## AlmaLinux
+    {% for os in value.value.juno_supported_alma %}- {{ os + "\n"}}{% endfor %}
+  {% endif %}
+{% endfor %}
