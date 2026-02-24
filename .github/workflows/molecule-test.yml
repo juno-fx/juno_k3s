@@ -1,6 +1,11 @@
 on:
   push:
-
+    paths-ignore:
+      - '.github/**'
+      - "README.md"
+      - "docs/**"
+  workflow_dispatch:
+  workflow_call:
 jobs:
   molecule-test:
     runs-on:
