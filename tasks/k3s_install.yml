@@ -34,6 +34,16 @@
     group: root
     mode: "0750"
 
+- name: Symlink image folder
+  become: true
+  when: k3s_image_folder != /var/lib/rancher
+  ansible.builtin.file:
+    src: /var/lib/rancher
+    dest: "{{ k3s_image_folder }}"
+    owner: root
+    group: root
+    state: link
+
 - name: Download the install script (http/s fetch)
   when: "'http://' in k3s_install_script_url or 'https://' in k3s_install_script_url"
   ansible.builtin.get_url:
