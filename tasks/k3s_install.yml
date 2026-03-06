@@ -24,6 +24,25 @@
     group: root
   become: true
 
+- name: Create the target symlink image folder if  configured
+  become: true
+  when: k3s_image_folder != "/var/lib/rancher"
+  ansible.builtin.file:
+    path: "{{ k3s_image_folder }}"
+    owner: root
+    group: root
+    state: directory
+
+- name: Symlink image folder
+  become: true
+  when: k3s_image_folder != "/var/lib/rancher"
+  ansible.builtin.file:
+    src: "{{ k3s_image_folder }}"
+    dest: /var/lib/rancher
+    owner: root
+    group: root
+    state: link
+
 - name: When performing an airgap install, ensure the image dir exists
   become: true
   when: k3s_airgap_install | bool
@@ -33,16 +52,6 @@
     owner: root
     group: root
     mode: "0750"
-
-- name: Symlink image folder
-  become: true
-  when: k3s_image_folder != /var/lib/rancher
-  ansible.builtin.file:
-    src: /var/lib/rancher
-    dest: "{{ k3s_image_folder }}"
-    owner: root
-    group: root
-    state: link
 
 - name: Download the install script (http/s fetch)
   when: "'http://' in k3s_install_script_url or 'https://' in k3s_install_script_url"
