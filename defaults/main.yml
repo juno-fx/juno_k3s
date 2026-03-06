@@ -129,6 +129,10 @@ k3s_node_labels:
 #   By default, we don't perform this if you define registries.yaml, as it is assumed you will have a local mirror.
 k3s_copy_images: "{{ k3s_airgap_install and not k3s_registries_yaml }}"
 
+# @var k3s_open_file_limit:description: >
+#   The open file limit for k3s, this sets the LimitNOFILE setting
+k3s_open_file_limit: 99999999999
+
 argocd_image_substitutions:
   "quay.io/argoproj/argocd":
     newName: "quay.io/argoproj/argocd"
