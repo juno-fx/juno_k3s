@@ -1,6 +1,6 @@
 # juno_k3s
 
-<generator object sync_do_map at 0x7f81300b0740>
+<generator object sync_do_map at 0x7f4bf3ab8340>
 
 ## Table of content
 
@@ -48,7 +48,7 @@
 | k3s_install_script_url | https://get.k3s.io/ |  URL for the k3s install script. Can be http://, https:// OR file://  When using file://, a path from your ansible control host (where your run the playbook from) will be used.  The files will be copied to the remote kubernetes hosts. This is useful for airgap installs. |
 | k3s_join_token |  |  The token used to join the cluster. You can specify it explicitly or let the playbook autodiscover it.  Check out the example playbook for how to do that.k3s_join_token: false |
 | k3s_node_labels | ["{{ k3s_control_plane_node | ternary('juno-innovations.com/service=true', 'juno-innovations.com/workstation=true') }}"] |  A list of labels to apply to a node on provisioning, only when k3s_perform_node_labeling is true.  Defaults to making each control plane node a Juno service node and each worker node a workstation node.  For details on how labels affect your Orion deployment, check out: https://juno-fx.github.io/Orion-Documentation/installation/pre-reqs/requirements/?h=label#1-labeling-nodes |
-| k3s_open_file_limit | 99999999999 |  The open file limit for k3s, this sets the LimitNOFILE setting |
+| k3s_open_file_limit | 1048576 |  The open file limit for k3s, this sets the LimitNOFILE setting |
 | k3s_perform_node_labeling | True |  Whether to label nodes when performing the initial k3s install.  Already existing nodes will not be labeled - use kubectl instead, per: https://juno-fx.github.io/Orion-Documentation/installation/pre-reqs/requirements/?h=label#1-labeling-nodes |
 | k3s_registries_yaml | False |  If true, the playbook will configure the registries.yaml file to use your internal mirror.  For syntax refer to https://docs.k3s.io/installation/private-registry  The data you pass in here will be directly templated into the registries.yaml file. |
 | k3s_uninstall | False |  If true, the playbook will run the default uninstall script (/usr/local/bin/k3s-uninstall.sh)  This is intended mostly for quick testing - in production, ideally you'd reprovision freshly. |
