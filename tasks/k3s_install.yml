@@ -24,6 +24,22 @@
     group: root
   become: true
 
+- name: Provide inotify increase config
+  ansible.builtin.template:
+    src: 99-juno-k3s-inotify.conf
+    dest: /etc/sysctl.d/99-juno-k3s-inotify.conf
+    mode: "0644"
+    owner: root
+    group: root
+  become: true
+  register: k3s_inotify
+
+- name: Read sysctl files
+  ansible.builtin.command:
+    cmd: sysctl --system
+  become: true
+  when: k3s_inotify.changed
+
 - name: Create the target symlink image folder if  configured
   become: true
   when: k3s_image_folder != "/var/lib/rancher"
