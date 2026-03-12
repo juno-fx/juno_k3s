@@ -8,6 +8,57 @@
     mode: "0750"
   become: true
 
+- name: Create systemd k3s config folder 
+  ansible.builtin.file:
+    path: /etc/systemd/system/k3s.service.d/
+    state: directory
+    mode: '755'
+  become: true
+
+- name: Provide file limit increase config
+  ansible.builtin.template:
+    src: filelimit.config.j2
+    dest: /etc/systemd/system/k3s.service.d/filelimit.conf
+    mode: "0644"
+    owner: root
+    group: root
+  become: true
+
+- name: Provide inotify increase config
+  ansible.builtin.template:
+    src: 99-juno-k3s-inotify.conf
+    dest: /etc/sysctl.d/99-juno-k3s-inotify.conf
+    mode: "0644"
+    owner: root
+    group: root
+  become: true
+  register: k3s_inotify
+
+- name: Read sysctl files
+  ansible.builtin.command:
+    cmd: sysctl --system
+  become: true
+  when: k3s_inotify.changed
+
+- name: Create the target symlink image folder if  configured
+  become: true
+  when: k3s_image_folder != "/var/lib/rancher"
+  ansible.builtin.file:
+    path: "{{ k3s_image_folder }}"
+    owner: root
+    group: root
+    state: directory
+
+- name: Symlink image folder
+  become: true
+  when: k3s_image_folder != "/var/lib/rancher"
+  ansible.builtin.file:
+    src: "{{ k3s_image_folder }}"
+    dest: /var/lib/rancher
+    owner: root
+    group: root
+    state: link
+
 - name: When performing an airgap install, ensure the image dir exists
   become: true
   when: k3s_airgap_install | bool

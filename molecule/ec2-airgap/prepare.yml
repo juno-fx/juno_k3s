@@ -59,7 +59,6 @@
       ansible.builtin.git:
         repo: https://github.com/kubernetes/ingress-nginx.git
         dest: /srv/git/ingress-nginx.git
-        version: "3.15.2"
         force: true
         update: true
         accept_hostkey: true

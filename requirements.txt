@@ -1,4 +1,3 @@
-git+https://github.com/ansible/molecule@main#egg=molecule
 molecule~=25.12
 ansible-core==2.20.0
 molecule-plugins[ec2]==25.8.12
