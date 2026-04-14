@@ -94,9 +94,23 @@
   when: "'file://' in k3s_binary_url"
 
 - name: Download the k3s binary (https/s fetch)
-  when: "'http://' in k3s_binary_url or 'https://' in k3s_binary_url"
+  when: 
+    - "'http://' in k3s_binary_url or 'https://' in k3s_binary_url"
+    - ansible_facts["architecture"] == "x86_64"
   ansible.builtin.get_url:
     url: "{{ k3s_binary_url }}"
+    dest: /usr/local/bin/k3s
+    mode: "0755"
+    owner: root
+    group: root
+  become: true
+
+- name: Download the ARM k3s binary (https/s fetch)
+  when: 
+    - "'http://' in k3s_binary_url_arm or 'https://' in k3s_binary_url_arm"
+    - ansible_facts["architecture"] == "aarch64" or ansible_facts["architecture"] == "arm64"
+  ansible.builtin.get_url:
+    url: "{{ k3s_binary_url_arm }}"
     dest: /usr/local/bin/k3s
     mode: "0755"
     owner: root
@@ -117,12 +131,30 @@
     group: root
   become: true
 
+- name: Show facts dict keys
+  debug:
+    var: ansible_facts["architecture"]
+
 - name: Download the k3s images (https/s fetch)
   when:
-    - "'http://' in k3s_images_url or 'https://' in k3s_images_url"
-    - k3s_copy_images
+    - k3s_images_url is search('^https?://')
+    - k3s_copy_images | bool
+    - ansible_facts["architecture"] == "x86_64"
   ansible.builtin.get_url:
     url: "{{ k3s_images_url }}"
+    dest: "/var/lib/rancher/k3s/agent/images/{{ k3s_images_url | basename }}"
+    mode: "0644"
+    owner: root
+    group: root
+  become: true
+
+- name: Download the ARM k3s images (https/s fetch)
+  when:
+    - k3s_images_url_arm is search('^https?://')
+    - k3s_copy_images | bool
+    - ansible_facts["architecture"] == "aarch64" or ansible_facts["architecture"] == "arm64"
+  ansible.builtin.get_url:
+    url: "{{ k3s_images_url_arm }}"
     dest: "/var/lib/rancher/k3s/agent/images/{{ k3s_images_url | basename }}"
     mode: "0644"
     owner: root
@@ -212,6 +244,13 @@
   ansible.builtin.set_fact:
     flags: "{{ flags + (k3s_node_labels | map('regex_replace', '^(.*)$', '--node-label \\1') | list) }}"
   when: k3s_perform_node_labeling
+
+- name: Install wireguard tools for flannel
+  ansible.builtin.apt:
+    name: wireguard
+    state: present
+    update_cache: yes
+  become: true
 
 - name: Install K3s with the constructed flags
   become: true

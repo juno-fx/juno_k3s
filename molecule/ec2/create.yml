@@ -147,7 +147,7 @@
         owners: "{{ item.image_owner }}"
         filters: "{{ item.image_filters | default({}) | combine(image_name_map) }}"
       vars:
-        image_name_map: "{% if item.image_name is defined and item.image_name | length > 0 %}{{ {'name': item.image_name} }}{% else %}{}{% endif %}"
+              image_name_map: "{{ {'name': item.image_name} if (item.image_name | default('')) | length > 0 else {} }}"
       loop: "{{ platforms }}"
       loop_control:
         label: "{{ item.name }}"
