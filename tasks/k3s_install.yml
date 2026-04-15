@@ -245,13 +245,6 @@
     flags: "{{ flags + (k3s_node_labels | map('regex_replace', '^(.*)$', '--node-label \\1') | list) }}"
   when: k3s_perform_node_labeling
 
-- name: Install wireguard tools for flannel
-  ansible.builtin.apt:
-    name: wireguard
-    state: present
-    update_cache: yes
-  become: true
-
 - name: Install K3s with the constructed flags
   become: true
   ansible.builtin.command:
