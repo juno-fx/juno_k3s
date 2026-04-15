@@ -13,7 +13,7 @@ jobs:
     strategy:
       max-parallel: 1 # this can be faster, working on it :)
       matrix:
-        os-target: [ubuntu24, rocky101, ubuntu24-arm]
+        os-target: [ubuntu24, rocky101, arm-ubuntu24]
     steps:
       - name: Checkout the code
         uses: actions/checkout@v4
