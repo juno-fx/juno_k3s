@@ -3,6 +3,7 @@
 debian12_AMI = ami-02da2f5b47450f5a8
 debian13_AMI = ami-050352a65e954abb1
 ubuntu24_AMI = ami-0d1b5a8c13042c939
+ubuntu24_ARM_AMI = ami-0c94f5949f343e408
 rocky95_AMI = ami-05150ea4d8a533099
 rocky101_AMI = ami-00c659dce896f9980
 alma101_AMI = ami-070f0d38c534f0fd8
@@ -50,11 +51,20 @@ test-airgap-%: venv/bin/activate
 destroy-airgap-%: venv/bin/activate
 	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} venv/bin/molecule destroy -s ec2-airgap
 
+converge-arm-%: venv/bin/activate
+	AWS_INSTANCE_TYPE=t4g.large . venv/bin/activate; AWS_AMI_ID=${$*_ARM_AMI} DISTRO=$* venv/bin/molecule converge -s ec2
+
 converge-%: venv/bin/activate
 	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} DISTRO=$* venv/bin/molecule converge -s ec2
 
+test-arm-%: venv/bin/activate
+	AWS_INSTANCE_TYPE=t4g.large . venv/bin/activate; AWS_AMI_ID=${$*_ARM_AMI} venv/bin/molecule test -s ec2
+
 test-%: venv/bin/activate
 	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} venv/bin/molecule test -s ec2
+
+destroy-arm-%: venv/bin/activate
+	. venv/bin/activate; AWS_AMI_ID=${$*_ARM_AMI} venv/bin/molecule destroy -s ec2
 
 destroy-%: venv/bin/activate
 	. venv/bin/activate; AWS_AMI_ID=${$*_AMI} venv/bin/molecule destroy -s ec2
@@ -79,6 +89,7 @@ destroy-airgap-rocky101: destroy-airgap-rocky101
 converge-debian12: converge-debian12
 converge-debian13: converge-debian13
 converge-ubuntu24: converge-ubuntu24
+converge-arm-ubuntu24: converge-arm-ubuntu24
 converge-rocky95: converge-rocky95
 converge-rocky101: converge-rocky101
 test-debian12: test-debian12

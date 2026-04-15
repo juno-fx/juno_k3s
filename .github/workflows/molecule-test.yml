@@ -13,7 +13,10 @@ jobs:
     strategy:
       max-parallel: 1 # this can be faster, working on it :)
       matrix:
-        os-target: [ubuntu24, debian12, debian13, rocky95, rocky101, alma101]
+        # In order to speed up the CI here we are only going to run the major versions we are going to support
+        # instead of all versions, these should be tested locally when making relevant changes
+        # Currently focus on, deb, rhel and arm support
+        os-target: [ubuntu24, rocky101, arm-ubuntu24]
     steps:
       - name: Checkout the code
         uses: actions/checkout@v4
