@@ -6,13 +6,13 @@ validate_os_version: true
 #   URL for the k3s binary. Can be http://, https:// OR file://
 #   When using file://, a path from your ansible control host (where your run the playbook from) will be used.
 #   The files will be copied to the remote kubernetes hosts. This is useful for airgap installs.
-k3s_binary_url: https://github.com/k3s-io/k3s/releases/download/v1.33.1%2Bk3s1/k3s
+k3s_binary_url: https://github.com/k3s-io/k3s/releases/download/v1.36.1%2Bk3s1/k3s
 
 # @var k3s_binary_url_arm:description: >
 #   URL for the k3s binary. Can be http://, https:// OR file://
 #   When using file://, a path from your ansible control host (where your run the playbook from) will be used.
 #   The files will be copied to the remote kubernetes hosts. This is useful for airgap installs.
-k3s_binary_url_arm: https://github.com/k3s-io/k3s/releases/download/v1.33.1%2Bk3s1/k3s-arm64 
+k3s_binary_url_arm: https://github.com/k3s-io/k3s/releases/download/v1.36.1%2Bk3s1/k3s-arm64 
 
 # @var k3s_install_script_url:description: >
 #   URL for the k3s install script. Can be http://, https:// OR file://
@@ -24,13 +24,13 @@ k3s_install_script_url: https://get.k3s.io/
 #   URL for the k3s images tarball. Can be http://, https:// OR file://
 #   When using file://, a path from your ansible control host (where your run the playbook from) will be used.
 #   The files will be copied to the remote kubernetes hosts. This is useful for airgap installs.
-k3s_images_url: https://github.com/k3s-io/k3s/releases/download/v1.33.1%2Bk3s1/k3s-airgap-images-amd64.tar.gz
+k3s_images_url: https://github.com/k3s-io/k3s/releases/download/v1.36.1%2Bk3s1/k3s-airgap-images-amd64.tar.gz
 
 # @var k3s_images_url_arm:description: >
 #   URL for the k3s images tarball. Can be http://, https:// OR file://
 #   When using file://, a path from your ansible control host (where your run the playbook from) will be used.
 #   The files will be copied to the remote kubernetes hosts. This is useful for airgap installs.
-k3s_images_url_arm: https://github.com/k3s-io/k3s/releases/download/v1.33.1%2Bk3s1/k3s-airgap-images-arm64.tar.gz
+k3s_images_url_arm: https://github.com/k3s-io/k3s/releases/download/v1.36.1%2Bk3s1/k3s-airgap-images-arm64.tar.gz
 
 # @var k3s_join_token:description: >
 #   The token used to join the cluster. You can specify it explicitly or let the playbook autodiscover it.
