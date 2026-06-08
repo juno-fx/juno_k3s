@@ -32,9 +32,10 @@
   register: kernel_mods
   when: ansible_distribution_major_version|int == 10
 
-- name: Unconditionally reboot the machine with all defaults
+- name: Reboot the machine with all defaults
   ansible.builtin.reboot:
   become: true
+  when: kernel_mods | bool
 
 - name: Reload depmods
   ansible.builtin.command:
