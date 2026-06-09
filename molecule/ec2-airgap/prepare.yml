@@ -251,7 +251,7 @@
         mode: "0644"
     - name: Download the k3s binary to the airgap_files directory
       ansible.builtin.get_url:
-        url: "https://github.com/k3s-io/k3s/releases/download/v1.33.1%2Bk3s1/k3s"
+        url: "https://github.com/k3s-io/k3s/releases/download/v1.36.1%2Bk3s1/k3s"
         dest: "{{ playbook_dir }}/airgap_files/k3s"
         mode: "0644"
 
