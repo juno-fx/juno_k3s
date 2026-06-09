@@ -1,6 +1,6 @@
 # juno_k3s
 
-<generator object sync_do_map at 0x7f4bf3ab8340>
+<generator object sync_do_map at 0x7f60d7fa0340>
 
 ## Table of content
 
@@ -36,7 +36,8 @@
 | juno_supported_debian | ['12', '13'] |The major versions of Debian Juno supported running on |
 | juno_supported_rhel | ['9', '10'] |The major versions of Redhat (and Rocky) Juno supported running on |
 | k3s_airgap_install | False |  If true, the playbook will perform an airgapped install. Make sure all the URLs above are set to file:// or point to a local mirror.  When setting the URLs to file://, they will be copied from your Ansible control host to the remote hosts. |
-| k3s_binary_url | https://github.com/k3s-io/k3s/releases/download/v1.33.1%2Bk3s1/k3s |  URL for the k3s binary. Can be http://, https:// OR file://  When using file://, a path from your ansible control host (where your run the playbook from) will be used.  The files will be copied to the remote kubernetes hosts. This is useful for airgap installs. |
+| k3s_binary_url | https://github.com/k3s-io/k3s/releases/download/v1.36.1%2Bk3s1/k3s |  URL for the k3s binary. Can be http://, https:// OR file://  When using file://, a path from your ansible control host (where your run the playbook from) will be used.  The files will be copied to the remote kubernetes hosts. This is useful for airgap installs. |
+| k3s_binary_url_arm | https://github.com/k3s-io/k3s/releases/download/v1.36.1%2Bk3s1/k3s-arm64 |  URL for the k3s binary. Can be http://, https:// OR file://  When using file://, a path from your ansible control host (where your run the playbook from) will be used.  The files will be copied to the remote kubernetes hosts. This is useful for airgap installs. |
 | k3s_bootstrap_node | False |  The node used to bootstrap the cluster. This should only ever be a single node in your inventory!  The playbook example we provide discovers this dynamically, but you can also set it manually. |
 | k3s_bootstrap_node_ip | False |  The IP address of an existing controlplane node, used to join the cluster.  In most cases, we can automatically discover this, check out the playbook example - it does that out of the box! |
 | k3s_clusterjoin_address | False |The address of the cluster to join. Can only be false when k3s_bootstrap_node is true. |
@@ -44,7 +45,8 @@
 | k3s_copy_images | {{ k3s_airgap_install and not k3s_registries_yaml }} |  If true, the role will copy the k3s images tarball to the standard location where k3s can load them.  By default, we don't perform this if you define registries.yaml, as it is assumed you will have a local mirror. |
 | k3s_force_reinstall | False |  If true, rerun the k3s install script even if the node is already part of a cluster. |
 | k3s_image_folder | /var/lib/rancher | |
-| k3s_images_url | https://github.com/k3s-io/k3s/releases/download/v1.33.1%2Bk3s1/k3s-airgap-images-amd64.tar.gz |  URL for the k3s images tarball. Can be http://, https:// OR file://  When using file://, a path from your ansible control host (where your run the playbook from) will be used.  The files will be copied to the remote kubernetes hosts. This is useful for airgap installs. |
+| k3s_images_url | https://github.com/k3s-io/k3s/releases/download/v1.36.1%2Bk3s1/k3s-airgap-images-amd64.tar.gz |  URL for the k3s images tarball. Can be http://, https:// OR file://  When using file://, a path from your ansible control host (where your run the playbook from) will be used.  The files will be copied to the remote kubernetes hosts. This is useful for airgap installs. |
+| k3s_images_url_arm | https://github.com/k3s-io/k3s/releases/download/v1.36.1%2Bk3s1/k3s-airgap-images-arm64.tar.gz |  URL for the k3s images tarball. Can be http://, https:// OR file://  When using file://, a path from your ansible control host (where your run the playbook from) will be used.  The files will be copied to the remote kubernetes hosts. This is useful for airgap installs. |
 | k3s_install_script_url | https://get.k3s.io/ |  URL for the k3s install script. Can be http://, https:// OR file://  When using file://, a path from your ansible control host (where your run the playbook from) will be used.  The files will be copied to the remote kubernetes hosts. This is useful for airgap installs. |
 | k3s_join_token |  |  The token used to join the cluster. You can specify it explicitly or let the playbook autodiscover it.  Check out the example playbook for how to do that.k3s_join_token: false |
 | k3s_node_labels | ["{{ k3s_control_plane_node | ternary('juno-innovations.com/service=true', 'juno-innovations.com/workstation=true') }}"] |  A list of labels to apply to a node on provisioning, only when k3s_perform_node_labeling is true.  Defaults to making each control plane node a Juno service node and each worker node a workstation node.  For details on how labels affect your Orion deployment, check out: https://juno-fx.github.io/Orion-Documentation/installation/pre-reqs/requirements/?h=label#1-labeling-nodes |
