@@ -35,17 +35,17 @@
 - name: Reboot the machine with all defaults
   ansible.builtin.reboot:
   become: true
-  when: kernel_mods | bool
+  when: kernel_mods.changed | bool
 
 - name: Reload depmods
   ansible.builtin.command:
     cmd: depmod -a
-  when: kernel_mods | bool
+  when: kernel_mods.changed | bool
   become: true
 
 - name: Load in the required modules for k3s to work on the fly
   ansible.builtin.command:
     cmd: modprobe -a nf_conntrack xt_conntrack nf_conntrack_netlink
-  when: kernel_mods | bool
+  when: kernel_mods.changed | bool
   become: true
 
