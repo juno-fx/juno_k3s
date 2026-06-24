@@ -153,13 +153,13 @@ k3s_image_folder: /var/lib/rancher
 argocd_image_substitutions:
   "quay.io/argoproj/argocd":
     newName: "quay.io/argoproj/argocd"
-    newTag: "v3.0.9"
+    newTag: "v3.4.4"
   "ghcr.io/dexidp/dex":
     newName: "ghcr.io/dexidp/dex"
-    newTag: "v2.41.1"
+    newTag: "v2.45.0"
   "docker.io/library/redis":
     newName: "docker.io/library/redis"
-    newTag: "7.2.7-alpine"
+    newTag: "8.2.3-alpine"
 
 # @var argocd_image_pull_secret:description: >
 #   When set, the passed in credentials will be used to pull the ArgoCD images.
