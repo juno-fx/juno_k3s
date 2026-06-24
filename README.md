@@ -1,6 +1,6 @@
 # juno_k3s
 
-<generator object sync_do_map at 0x7f60d7fa0340>
+<generator object sync_do_map at 0x7f52a2e54340>
 
 ## Table of content
 
@@ -20,7 +20,7 @@
 |:-----|:--------------|:------------|
 | argocd_image_pull_secret | False |  When set, the passed in credentials will be used to pull the ArgoCD images.  Example:    argocd_image_pull_secret:      username: my-username      password: my-password      registry: my-registry.com |
 | argocd_image_pull_secret_name | argo-image-pull-secret |  The name of the image pull secret to use for ArgoCD. |
-| argocd_image_substitutions | {'quay.io/argoproj/argocd': {'newName': 'quay.io/argoproj/argocd', 'newTag': 'v3.0.9'}, 'ghcr.io/dexidp/dex': {'newName': 'ghcr.io/dexidp/dex', 'newTag': 'v2.41.1'}, 'docker.io/library/redis': {'newName': 'docker.io/library/redis', 'newTag': '7.2.7-alpine'}} | |
+| argocd_image_substitutions | {'quay.io/argoproj/argocd': {'newName': 'quay.io/argoproj/argocd', 'newTag': 'v3.4.4'}, 'ghcr.io/dexidp/dex': {'newName': 'ghcr.io/dexidp/dex', 'newTag': 'v2.45.0'}, 'docker.io/library/redis': {'newName': 'docker.io/library/redis', 'newTag': '8.2.3-alpine'}} | |
 | juno_bootstrap_chart_repo_revision | main |  The revision of the Juno-Bootstrap repository to use. This can be a branch name, tag or commit hash. |
 | juno_bootstrap_chart_values | {'genesis': {'url': '{{juno_genesis_deployment_git_url}}'}, 'ingress': {'url': 'https://kubernetes.github.io/ingress-nginx'}} |  Values to pass to the Juno Bootstrap chart. See: https://github.com/juno-fx/Juno-Bootstrap If you do not use a direct OCI proxy and leverage the k3s_registries_yaml var, you also could need to adjust the repository from which to pull images. For details, see: https://github.com/juno-fx/Juno-Bootstrap and the example airgapped playbook. |
 | juno_bootstrap_git_password | {{ juno_git_password }} | This authenticates only the Juno-Bootstrap repository. You can leave it unchanged if both Juno-Bootstrap and Genesis-Deployment are accessible via juno_git_username&juno_git_password.You only need to set this if you use a private fork of the Juno Bootstrap repository and are not passing it in via local checkout |
