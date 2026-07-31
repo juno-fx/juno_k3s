@@ -2,6 +2,7 @@
 
 debian12_AMI = ami-02da2f5b47450f5a8
 debian13_AMI = ami-050352a65e954abb1
+ubuntu26_AMI = ami-0e5497a77ef21b5ac
 ubuntu24_AMI = ami-0d1b5a8c13042c939
 ubuntu24_ARM_AMI = ami-0c94f5949f343e408
 rocky95_AMI = ami-05150ea4d8a533099
@@ -74,32 +75,38 @@ destroy-%: venv/bin/activate
 converge-airgap-debian12: converge-airgap-debian12
 converge-airgap-debian13: converge-airgap-debian13
 converge-airgap-ubuntu24: converge-airgap-ubuntu24
+converge-airgap-ubuntu26: converge-airgap-ubuntu26
 converge-airgap-rocky95: converge-airgap-rocky95
 converge-airgap-rocky101: converge-airgap-rocky101
 test-airgap-debian12: test-airgap-debian12
 test-airgap-debian13: test-airgap-debian13
 test-airgap-ubuntu24: test-airgap-ubuntu24
+test-airgap-ubuntu26: test-airgap-ubuntu26
 test-airgap-rocky95: test-airgap-rocky95
 test-airgap-rocky101: test-airgap-rocky101
 destroy-airgap-debian12: destroy-airgap-debian12
 destroy-airgap-debian13: destroy-airgap-debian13
 destroy-airgap-ubuntu24: destroy-airgap-ubuntu24
+destroy-airgap-ubuntu26: destroy-airgap-ubuntu26
 destroy-airgap-rocky95: destroy-airgap-rocky95
 destroy-airgap-rocky101: destroy-airgap-rocky101
 converge-debian12: converge-debian12
 converge-debian13: converge-debian13
 converge-ubuntu24: converge-ubuntu24
+converge-ubuntu26: converge-ubuntu26
 converge-arm-ubuntu24: converge-arm-ubuntu24
 converge-rocky95: converge-rocky95
 converge-rocky101: converge-rocky101
 test-debian12: test-debian12
 test-debian13: test-debian13
 test-ubuntu24: test-ubuntu24
+test-ubuntu26: test-ubuntu26
 test-rocky95: test-rocky95
 test-rocky101: test-rocky101
 destroy-debian12: destroy-debian12
 destroy-debian13: destroy-debian13
 destroy-ubuntu24: destroy-ubuntu24
+destroy-ubuntu26: destroy-ubuntu26
 destroy-rocky95: destroy-rocky95
 destroy-rocky101: destroy-rocky101
 login-control_plane01: login-control_plane01

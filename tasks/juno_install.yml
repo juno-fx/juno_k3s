@@ -46,7 +46,7 @@
   ansible.builtin.command:
     cmd: /usr/local/bin/k3s kubectl apply --server-side=true --force-conflicts -k /root/juno_argo_kustomization/ --namespace argocd
   register: argo_deploy_result
-  failed_when: argo_deploy_result.rc != 0 and "'AlreadyExists' not in argo_deploy_result.stderr"
+  failed_when: argo_deploy_result.rc != 0 and 'AlreadyExists' not in argo_deploy_result.stderr
   changed_when: "('created' in argo_deploy_result.stdout) and argo_deploy_result.rc == 0"
 
 - name: Add credentials for Genesis-Deployment
