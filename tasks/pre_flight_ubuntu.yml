@@ -7,5 +7,6 @@
     fail_msg: "This Ansible role is only supported on {{ supported_major_versions | join(', ') }} Ubuntu versions."
   vars:
     supported_major_versions:
+      - "26"
       - "24"
       - "22"
