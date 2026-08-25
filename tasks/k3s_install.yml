@@ -289,7 +289,6 @@
   become: true
   ansible.builtin.command:
     cmd: /opt/k3s/install.sh {{ node_role }} {{ flags | join(' ') }}
-  when: k3s_status != 'running' or k3s_force_reinstall
   environment:
     INSTALL_K3S_SKIP_DOWNLOAD: "true"
   vars:
