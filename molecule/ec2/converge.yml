@@ -78,6 +78,7 @@
         name: "juno-fx.juno_k3s"
 
     - name: Ensure k3s worker nodes
+      throttle: 1
       vars:
         k3s_join_token: "{{ k3s_bootstrap_node_token }}"
       when:
