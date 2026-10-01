@@ -285,13 +285,48 @@
     flags: "{{ flags + (k3s_node_labels | map('regex_replace', '^(.*)$', '--node-label \\1') | list) }}"
   when: k3s_perform_node_labeling
 
-- name: Install/join K3s with the constructed flags
-  become: true
-  ansible.builtin.command:
-    cmd: /opt/k3s/install.sh {{ node_role }} {{ flags | join(' ') }}
-  environment:
-    INSTALL_K3S_SKIP_DOWNLOAD: "true"
-  vars:
-    node_role: "{{ 'server' if k3s_control_plane_node or k3s_bootstrap_node else 'agent' }}"
-  register: k3s_install_result
-  changed_when: "'No change detected so skipping service start' not in k3s_install_result.stdout"
+- name: Install/join K3s with debug on failure
+  block:
+    - name: Install/join K3s with the constructed flags
+      become: true
+      ansible.builtin.command:
+        cmd: /opt/k3s/install.sh {{ node_role }} {{ flags | join(' ') }}
+      environment:
+        INSTALL_K3S_SKIP_DOWNLOAD: "true"
+      vars:
+        node_role: "{{ 'server' if k3s_control_plane_node or k3s_bootstrap_node else 'agent' }}"
+      register: k3s_install_result
+      changed_when: "'No change detected so skipping service start' not in k3s_install_result.stdout"
+  rescue:
+    - name: Capture k3s service status
+      ansible.builtin.command: systemctl status k3s.service --no-pager -l
+      register: k3s_status
+      changed_when: false
+      failed_when: false
+
+    - name: Capture k3s journal
+      ansible.builtin.command: journalctl -u k3s.service --no-pager -n 100
+      register: k3s_journal
+      changed_when: false
+      failed_when: false
+
+    - name: Capture generated config and unit
+      ansible.builtin.shell: |
+        echo "--- /etc/systemd/system/k3s.service ---"; cat /etc/systemd/system/k3s.service
+        echo "--- /etc/rancher/k3s ---"; ls -la /etc/rancher/k3s; cat /etc/rancher/k3s/*.yaml 2>/dev/null
+        echo "--- version ---"; /usr/local/bin/k3s --version
+        echo "--- connectivity to server ---"; curl -ksS -m 5 -o /dev/null -w '%{http_code}\n' https://{{ k3s_bootstrap_node_ip | default('UNSET') }}:6443/ping
+      register: k3s_ctx
+      changed_when: false
+      failed_when: false
+
+    - name: Show diagnostics
+      ansible.builtin.debug:
+        msg:
+          - "{{ k3s_status.stdout_lines }}"
+          - "{{ k3s_journal.stdout_lines }}"
+          - "{{ k3s_ctx.stdout_lines }}"
+
+    - name: Fail after collecting diagnostics
+      ansible.builtin.fail:
+        msg: "k3s failed to start on {{ inventory_hostname }}; see diagnostics above"
