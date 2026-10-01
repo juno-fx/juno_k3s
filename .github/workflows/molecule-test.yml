@@ -36,7 +36,7 @@ jobs:
         # In order to speed up the CI here we are only going to run the major versions we are going to support
         # instead of all versions, these should be tested locally when making relevant changes
         # Currently focus on, deb, rhel and arm support
-        os-target: [arm-ubuntu26]
+        os-target: [arm-ubuntu24]
     steps:
       - name: Checkout the code
         uses: actions/checkout@v4
