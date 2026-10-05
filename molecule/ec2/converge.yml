@@ -1,5 +1,5 @@
 ---
-- name: Ensure the correct state of all nodes in the cluster
+- name: Prepare and configure k3s control plane
   hosts: all
   vars:
   tasks:
@@ -8,6 +8,7 @@
         path: /var/lib/rancher/k3s/server/token
       become: true
       register: stat_k3s_bootstrap_node_token_file
+
     - name: If the token exists on any node, set the skip_bootstrap variable
       ansible.builtin.set_fact:
         k3s_skip_bootstrap: false
@@ -20,7 +21,7 @@
       loop: "{{ ansible_play_hosts }}"
       delegate_to: "{{ item }}"
       run_once: true
-    
+
     - any_errors_fatal: true
       block:
         - name: If the join token doesn't exist at all, bootstrap the cluster on the 1st control plane node in the inventory
@@ -41,7 +42,6 @@
             - not stat_k3s_bootstrap_node_token_file.stat.exists
             - k3s_control_plane_node | default(false) | bool
             - not k3s_skip_bootstrap | default(false)
-
 
     - name: Check if the join token file exists (again)
       ansible.builtin.stat:
@@ -65,6 +65,7 @@
       loop: "{{ ansible_play_hosts }}"
       run_once: true
       delegate_to: "{{ item }}"
+
     - name: Gather service facts on the control plane nodes
       ansible.builtin.service_facts:
       when: k3s_control_plane_node | default(false) | bool
@@ -77,10 +78,14 @@
       ansible.builtin.include_role:
         name: "juno-fx.juno_k3s"
 
+- name: Ensure k3s worker nodes sequentially
+  hosts: all
+  serial: 1 # One by one
+  tasks:
     - name: Ensure k3s worker nodes
-      throttle: 1
       vars:
-        k3s_join_token: "{{ k3s_bootstrap_node_token }}"
+        # Access the token saved in hostvars from Play 1
+        k3s_join_token: "{{ hostvars[groups['all'][0]]['k3s_bootstrap_node_token'] }}"
       when:
         - not k3s_control_plane_node | default(false) | bool
       ansible.builtin.include_role:
