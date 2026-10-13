@@ -2,7 +2,7 @@
 - name: Create the argocd namespace
   become: true
   ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl create namespace argocd
+    cmd: /usr/local/bin/k3s kubectl create namespace {{ genesis_namespace }}
   register: argocd_namespace_result
   failed_when: argocd_namespace_result.rc != 0 and('already exists' not in argocd_namespace_result.stderr)
   changed_when: argocd_namespace_result.rc == 0
@@ -24,8 +24,8 @@
 
 - name: Copy in the argo manifest
   become: true
-  ansible.builtin.copy:
-    src: "argocd_airgap_kustomization/argo_3.4.4.yaml"
+  ansible.builtin.template:
+    src: "argocd_airgap_kustomization/argo_3.4.4.yaml.j2"
     dest: /root/juno_argo_kustomization/argo_3.4.4.yaml
     mode: "0640"
     owner: root
@@ -35,7 +35,7 @@
   when: argocd_image_pull_secret
   become: true
   ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl create secret docker-registry {{ argocd_image_pull_secret_name }} --namespace argocd --docker-server={{ argocd_image_pull_secret.registry }} --docker-username={{ argocd_image_pull_secret.username }} --docker-password={{ argocd_image_pull_secret.password }}
+    cmd: /usr/local/bin/k3s kubectl create secret docker-registry {{ argocd_image_pull_secret_name }} --namespace {{ genesis_namespace }} --docker-server={{ argocd_image_pull_secret.registry }} --docker-username={{ argocd_image_pull_secret.username }} --docker-password={{ argocd_image_pull_secret.password }}
   register: argo_imagepullsecret_result
   failed_when: argo_imagepullsecret_result.rc != 0 and "'already exists' not in argo_imagepullsecret_result.stderr"
   changed_when: "('created' in argo_imagepullsecret_result.stdout) and argo_imagepullsecret_result.rc == 0"
@@ -44,7 +44,7 @@
 - name: Deploy argo using kubectl
   become: true
   ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl apply --server-side=true --force-conflicts -k /root/juno_argo_kustomization/ --namespace argocd
+    cmd: /usr/local/bin/k3s kubectl apply --server-side=true --force-conflicts -k /root/juno_argo_kustomization/ --namespace {{ genesis_namespace }}
   register: argo_deploy_result
   failed_when: argo_deploy_result.rc != 0 and 'AlreadyExists' not in argo_deploy_result.stderr
   changed_when: "('created' in argo_deploy_result.stdout) and argo_deploy_result.rc == 0"
@@ -54,14 +54,14 @@
   when: juno_genesis_deployment_git_password | bool
   register: juno_genesis_deployment_git_password_result
   ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl apply -f - --namespace argocd
+    cmd: /usr/local/bin/k3s kubectl apply -f - --namespace {{ genesis_namespace }}
   args:
     stdin: |
       apiVersion: v1
       kind: Secret
       metadata:
         name: juno-genesis-deployment-repo-secret
-        namespace: argocd
+        namespace: {{ genesis_namespace }}
         labels:
           argocd.argoproj.io/secret-type: repository
       stringData:
@@ -110,7 +110,7 @@
 - name: Wait for the argo app controller to be available
   become: true
   ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=argocd-application-controller -n argocd --timeout=600s
+    cmd: /usr/local/bin/k3s kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=argocd-application-controller -n {{ genesis_namespace }} --timeout=600s
   register: wait_for_argocd_result
   failed_when: wait_for_argocd_result.rc != 0
   changed_when: false
@@ -118,14 +118,14 @@
 - name: Obtain the name of the argocd app controller pod
   become: true
   ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl get pods -n argocd -l app.kubernetes.io/name=argocd-application-controller -o jsonpath='{.items[0].metadata.name}'
+    cmd: /usr/local/bin/k3s kubectl get pods -n {{ genesis_namespace }} -l app.kubernetes.io/name=argocd-application-controller -o jsonpath='{.items[0].metadata.name}'
   register: argocd_app_controller_pod_name
   changed_when: false
 
 - name: Ensure /tmp/juno_boostrap does not exist in the argocd-application-controller pod
   become: true
   ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl exec -n argocd {{ argocd_app_controller_pod_name.stdout }} -- rm -rf /tmp/juno_bootstrap
+    cmd: /usr/local/bin/k3s kubectl exec -n {{ genesis_namespace }} {{ argocd_app_controller_pod_name.stdout }} -- rm -rf /tmp/juno_bootstrap
   changed_when: false
 
 - name: Template in the juno-bootstrap values
@@ -141,7 +141,7 @@
   changed_when: false
   become: true
   ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl cp /tmp/juno_bootstrap argocd/{{ argocd_app_controller_pod_name.stdout }}:/tmp/juno_bootstrap -n argocd
+    cmd: /usr/local/bin/k3s kubectl cp /tmp/juno_bootstrap {{ genesis_namespace }}/{{ argocd_app_controller_pod_name.stdout }}:/tmp/juno_bootstrap -n {{ genesis_namespace }}
   register: copy_juno_bootstrap_result
   failed_when: copy_juno_bootstrap_result.rc != 0
 
@@ -149,4 +149,4 @@
   become: true
   changed_when: false
   ansible.builtin.command:
-    cmd: /usr/local/bin/k3s kubectl exec -n argocd {{ argocd_app_controller_pod_name.stdout }} -- helm upgrade --install juno-bootstrap /tmp/juno_bootstrap/chart --values /tmp/juno_bootstrap/chart/values.yaml --values /tmp/juno_bootstrap/values.yml --set gpu.config.toolkit.env[0].name=CONTAINERD_CONFIG --set gpu.config.toolkit.env[0].value=/var/lib/rancher/k3s/agent/etc/containerd/config.toml --set gpu.config.toolkit.env[1].name=CONTAINERD_SOCKET --set gpu.config.toolkit.env[1].value=/run/k3s/containerd/containerd.sock
+    cmd: /usr/local/bin/k3s kubectl exec -n {{ genesis_namespace }} {{ argocd_app_controller_pod_name.stdout }} -- helm upgrade --install juno-bootstrap /tmp/juno_bootstrap/chart --values /tmp/juno_bootstrap/chart/values.yaml --values /tmp/juno_bootstrap/values.yml --set gpu.config.toolkit.env[0].name=CONTAINERD_CONFIG --set gpu.config.toolkit.env[0].value=/var/lib/rancher/k3s/agent/etc/containerd/config.toml --set gpu.config.toolkit.env[1].name=CONTAINERD_SOCKET --set gpu.config.toolkit.env[1].value=/run/k3s/containerd/containerd.sock

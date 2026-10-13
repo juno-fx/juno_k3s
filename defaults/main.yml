@@ -99,6 +99,7 @@ juno_genesis_deployment_git_url: "https://github.com/juno-fx/Genesis-Deployment.
 juno_bootstrap_chart_values:
   genesis:
     url: "{{juno_genesis_deployment_git_url}}"
+    namespace: "{{ genesis_namespace }}"
   ingress:
     url: "https://kubernetes.github.io/ingress-nginx"
 
@@ -188,3 +189,6 @@ juno_supported_rhel:
 # @var juno_supported_alma:description: The major versions of AlmaLinux Juno supported running on
 juno_supported_alma:
   - "10"
+
+# @var genesis_namespace:description: Namespace to install Genesis and Argo into
+genesis_namespace: argocd

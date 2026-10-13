@@ -31130,7 +31130,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: argocd-application-controller
-  namespace: argocd
+  namespace: {{ genesis_namespace }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -31147,7 +31147,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: argocd-applicationset-controller
-  namespace: argocd
+  namespace: {{ genesis_namespace }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -31164,7 +31164,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: argocd-server
-  namespace: argocd
+  namespace: {{ genesis_namespace }}
 ---
 apiVersion: v1
 data:
